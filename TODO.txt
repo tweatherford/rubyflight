@@ -1,0 +1,2 @@
+- alguna clase que permita meter una condicion, y un tiempo. Esto se llama periodicamente, en el momento que es verdadera
+la condicion, se empieza a contar el tiempo. Si el tiempo pasa mas alla del especificado, cuando se haga el checkeo, se llama a un bloque o algo.

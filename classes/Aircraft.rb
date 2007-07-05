@@ -1,3 +1,5 @@
+require 'singleton'
+
 module RubyFlight
   class Aircraft
     include Singleton
@@ -6,38 +8,57 @@ module RubyFlight
     PITCH_OFFSET=0x578
     BANK_OFFSET=0x57C
     ALTITUDE_OFFSET=0x570    
+    RADIO_ALTITUDE_OFFSET=0x31E4
+    GROUND_ALTITUDE_OFFSET=0x20
+    ON_GROUND_OFFSET=0x366
+    PARKING_BRAKE_OFFSET=0xBC8
+    GROUND_SPEED_OFFSET=0x2B4
+    TRUE_AIRSPEED_OFFSET=0x2B8
+    INDICATED_AIRSPEED_OFFSET=0x2BC
+    PUSHBACK_STATE_OFFSET=0x31F0
     
     attr_reader(:thrust)
     def initialize
       @thrust = Thrust.new
     end
     
+    # In degrees (Float)
     def heading
-      (getUInt(HEADING_OFFSET, 4).to_f * (360.0/(65536.0*65536.0))).to_i
+      RubyFlight::getUInt(HEADING_OFFSET, 4).to_f * (360.0/(65536.0 * 65536.0))
       #getInt(HEADING_OFFSET, 4)
     end
     
+    # TODO: see this (Float)
     def pitch
       #getInt(PITCH_OFFSET, 4)
-      getReal(0x2e98)
+      RubyFlight::getReal(0x2e98)
     end
     
+    # In degrees, positive to the right, negative to the left (Float)
     def bank
-      getInt(BANK_OFFSET, 4)
+      RubyFlight::getInt(BANK_OFFSET, 4).to_f * (360.0 / (65536.0 * 65536.0))
     end
     
+    # How should I read this?
     def altitude
-      unit = getUInt(ALTITUDE_OFFSET + 4, 4)
-      fract = getUInt(ALTITUDE_OFFSET, 4)
+      unit = RubyFlight::getUInt(ALTITUDE_OFFSET + 4, 4)
+      fract = RubyFlight::getUInt(ALTITUDE_OFFSET, 4)
       puts "unit #{unit}, fract #{fract}"
     end
     
-    def radio_altitude
-      raise RuntimeError.new("Not implemented")
+    # In metres
+    def ground_altitude
+      RubyFlight::getUInt(RADIO_ALTITUDE_OFFSET, 4) / 256.0
     end
     
+    # In metres
+    def radio_altitude
+      RubyFlight::getUInt(RADIO_ALTITUDE_OFFSET, 4) / 65536.0
+    end
+    
+    # This is not updated on slew mode
     def on_ground?
-      raise RuntimeError.new("Not implemented")      
+      RubyFlight::getUInt(ON_GROUND_OFFSET, 2) == 1
     end
     
     def engines_off?
@@ -45,15 +66,30 @@ module RubyFlight
     end
     
     def parking_brake?
-      raise RuntimeError.new("Not implemented")      
+      RubyFlight::getInt(PARKING_BRAKE_OFFSET, 2) == 32767
+    end
+    
+    def pushing_back?
+      RubyFlight::getUInt(PUSHBACK_STATE_OFFSET, 4) != 3
     end
     
     def airport
       raise RuntimeError.new("Not implemented")      
     end
     
-    def speed
-      raise RuntimeError.new("Not implemented")      
+    # In knots
+    def indicated_airspeed
+      RubyFlight::getInt(INDICATED_AIRSPEED_OFFSET, 4) / 128.0
+    end
+    
+    # In knots
+    def true_airspeed
+      RubyFlight::getInt(TRUE_AIRSPEED_OFFSET, 4) / 128.0
+    end
+    
+    # In metres/sec (not updated in slew mode)
+    def ground_speed
+      RubyFlight::getInt(GROUND_SPEED_OFFSET, 4) / 65536.0
     end
     
     def on_runway?
