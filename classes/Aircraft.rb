@@ -16,10 +16,26 @@ module RubyFlight
     TRUE_AIRSPEED_OFFSET=0x2B8
     INDICATED_AIRSPEED_OFFSET=0x2BC
     PUSHBACK_STATE_OFFSET=0x31F0
+    LATITUDE_OFFSET=0x560
+    LONGITUDE_OFFSET=0x568
     
     attr_reader(:thrust)
     def initialize
       @thrust = Thrust.new
+    end
+    
+    def latitude
+      low = RubyFlight::getUInt(LATITUDE_OFFSET, 4).to_f / (65536.0 * 65536.0)
+      high = RubyFlight::getInt(LATITUDE_OFFSET + 4, 4).to_f
+      res = (high < 0 ? high - low : high + low)
+      return res * (90.0 / 10001750.0)
+    end
+    
+    def longitude
+      low = RubyFlight::getUInt(LONGITUDE_OFFSET, 4).to_f / (65536.0 * 65536.0)
+      high = RubyFlight::getInt(LONGITUDE_OFFSET + 4, 4).to_f
+      res = (high < 0 ? high - low : high + low)
+      return res * (360.0 / (65536.0 * 65536.0)) 
     end
     
     # In degrees (Float)

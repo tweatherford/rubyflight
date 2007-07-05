@@ -27,6 +27,8 @@ begin
     puts "TAS: #{RubyFlight::Aircraft.instance().true_airspeed} kts"        
     puts "IAS: #{RubyFlight::Aircraft.instance().indicated_airspeed} kts"        
     puts "Pushing Back?: #{RubyFlight::Aircraft.instance().pushing_back?}"            
+    puts "Latitude: #{RubyFlight::Aircraft.instance().latitude}"                
+    puts "Longitude: #{RubyFlight::Aircraft.instance().longitude}"                
     sleep(0.5)
   end    
   
