@@ -1,4 +1,5 @@
 require 'RubyFlight'
+require 'rubyflight/Interface'
 require 'rubyflight/Aircraft'
 require 'rubyflight/Position'
 require 'rubyflight/Thrust'

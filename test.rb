@@ -1,30 +1,32 @@
 require 'rubyflight'
 
 begin
-  RubyFlight::connect()
-  if (!RubyFlight::initialized?) 
+  sim = RubyFlight::Simulator.instance
+  sim.connect()
+  if (!sim.initialized?) 
     $stderr.puts "Connected, but not initialized, something strange happened"
     exit(1)
   else
     puts "Connected, initialized ok"
   end
   
-  RubyFlight::Simulator.instance().show_message("RubyFlight is working =]", 0)
+  sim.show_message("RubyFlight is working =]", 0)
+  aircraft = RubyFlight::Aircraft.instance
   
   while (true)
-    puts "Heading: #{RubyFlight::Aircraft.instance().heading()}"
-    puts "Bank: #{RubyFlight::Aircraft.instance().bank()}"
-    puts "Pitch: #{RubyFlight::Aircraft.instance().pitch()}"
-    puts "Altitude: #{RubyFlight::Aircraft.instance().altitude()}"
-    puts "Radio Altitude: #{RubyFlight::Aircraft.instance().radio_altitude()}"
-    puts "On Ground? #{RubyFlight::Aircraft.instance().on_ground?}"
-    puts "Parking Break? #{RubyFlight::Aircraft.instance().parking_brake?}"
-    puts "Ground Speed: #{RubyFlight::Aircraft.instance().ground_speed} m/s"    
-    puts "TAS: #{RubyFlight::Aircraft.instance().true_airspeed} kts"        
-    puts "IAS: #{RubyFlight::Aircraft.instance().indicated_airspeed} kts"        
-    puts "Pushing Back?: #{RubyFlight::Aircraft.instance().pushing_back?}"            
-    puts "Latitude: #{RubyFlight::Aircraft.instance().latitude}"                
-    puts "Longitude: #{RubyFlight::Aircraft.instance().longitude}"                
+    puts "Heading: #{aircraft.heading}"
+    puts "Bank: #{aircraft.bank}"
+    # puts "Pitch: #{aircraft.pitch}"
+    # puts "Altitude: #{aircraft.altitude}"
+    puts "Radio Altitude: #{aircraft.radio_altitude}"
+    puts "On Ground? #{aircraft.on_ground?}"
+    puts "Parking Break? #{aircraft.parking_brake?}"
+    puts "Ground Speed: #{aircraft.ground_speed} m/s"    
+    puts "TAS: #{aircraft.true_airspeed} kts"        
+    puts "IAS: #{aircraft.indicated_airspeed} kts"        
+    puts "Pushing Back?: #{aircraft.pushing_back?}"            
+    puts "Latitude: #{aircraft.latitude}"                
+    puts "Longitude: #{aircraft.longitude}"                
     sleep(0.5)
   end    
   

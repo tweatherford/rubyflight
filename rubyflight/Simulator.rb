@@ -3,14 +3,28 @@ require 'singleton'
 module RubyFlight
   class Simulator
     include Singleton
-
-    MESSAGE_OFFSET=0x3380
-    SEND_MESSAGE_OFFSET=0x32FA
     
+    def initialize
+      @vars = Variables::instance()
+    end
+
+    # TODO: verify display_option
     def show_message(s, display_option)
       if (s.length > 127) then raise RuntimeError.new("Cant show such a large message") end
-      RubyFlight::setString(MESSAGE_OFFSET, s.length + 1, s)
-      RubyFlight::setInt(SEND_MESSAGE_OFFSET, 2, display_option)
+      @vars.set(:message, s.length + 1, :string, s)
+      @vars.set(:send_message, 2, :int, display_option)
+    end
+    
+    def connect
+      RubyFlight.connect()
+    end
+    
+    def disconnect
+      RubyFlight.disconnect()
+    end
+    
+    def initialized?
+      return @vars.get(:initialized,2,:uint) == 0xFADE
     end
   end
 end
