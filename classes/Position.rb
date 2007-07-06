@@ -1,4 +1,7 @@
+include Math
+
 module RubyFlight
+  # A World Coordinate (in degreess, as a Float)
   class Position
     attr_accessor(:lat, :long)
     def initialize(lat, long)
@@ -6,6 +9,7 @@ module RubyFlight
       @long = long
     end
     
+    # In miles, supposeddly
     def distance_to(other)
       pos1 = Position.new(self.lat / 57.3, self.long / 57.3)
       pos2 = Position.new(other.lat / 57.3, other.long / 57.3)

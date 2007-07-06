@@ -89,8 +89,24 @@ module RubyFlight
       RubyFlight::getUInt(PUSHBACK_STATE_OFFSET, 4) != 3
     end
     
-    def airport
-      raise RuntimeError.new("Not implemented")      
+    # If it is near (given a radius in miles) a given airport. Note that only
+    # one runways is considered for each airport. This method loads the pre-dumped
+    # airports db every time it is called to save memory (loading is fast)
+    def near_airport?(code, radius)
+      airports = nil
+      File.open('airports.dump', 'r') {|io| airports = Marshal.load(io)}
+      lat = self.latitude
+      long = self.longitude
+      pos = Position.new(lat, long)      
+      
+      longitudes = airports[lat.to_i]
+      if (longitudes.nil?) then return false end
+      entries = longitudes[long.to_i]
+      if (entries.nil?) then return false end
+      
+      entries.find {|entry|
+        entry[0] == code && Position.new(entry[1], entry[2]).distance_to(pos).abs <= radius        
+      }
     end
     
     # In knots
@@ -106,10 +122,6 @@ module RubyFlight
     # In metres/sec (not updated in slew mode)
     def ground_speed
       RubyFlight::getInt(GROUND_SPEED_OFFSET, 4) / 65536.0
-    end
-    
-    def on_runway?
-      raise RuntimeError.new("Not implemented")      
     end
   end
 end
