@@ -1,3 +1,0 @@
-- alguna clase que permita meter una condicion, y un tiempo. Esto se llama periodicamente, en el momento que es verdadera
-la condicion, se empieza a contar el tiempo. Si el tiempo pasa mas alla del especificado, cuando se haga el checkeo, se llama a un bloque o algo.
-- alguna clase (+ extension a la interfaz) que permita pedir que se vaya a leer una variable (por offset y tamaño), que luego se haga un process y luego se puedan pedir los valores leidos

@@ -1,8 +1,4 @@
-require 'RubyFlight'
-require 'classes/Aircraft'
-require 'classes/Thrust'
-require 'classes/Simulator'
-require 'classes/misc'
+require 'rubyflight'
 
 begin
   RubyFlight::connect()
@@ -13,7 +9,7 @@ begin
     puts "Connected, initialized ok"
   end
   
-  RubyFlight::Simulator.instance().show_message("=]", 0)
+  RubyFlight::Simulator.instance().show_message("RubyFlight is working =]", 0)
   
   while (true)
     puts "Heading: #{RubyFlight::Aircraft.instance().heading()}"
