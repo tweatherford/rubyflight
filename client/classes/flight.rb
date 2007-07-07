@@ -1,7 +1,7 @@
 require 'fsm'
 include Automaton
 
-module OpenFS
+module RubyFlight
   class Flight
     MIN_TAXI_SPEED=5
     MAX_TAXI_SPEED=25

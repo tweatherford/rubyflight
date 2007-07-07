@@ -16,8 +16,8 @@ begin
   end
   
   puts "Getting current flight plan"
-  flightplan = OpenFS::FlightPlan.from_xml('flightplan.xml')
-  flight = OpenFS::Flight.new(flightplan)
+  flightplan = RubyFlight::FlightPlan.from_xml('flightplan.xml')
+  flight = RubyFlight::Flight.new(flightplan)
   
   while !flight.ended? && flight.valid?
     flight.process

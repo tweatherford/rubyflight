@@ -1,4 +1,4 @@
-module OpenFS
+module RubyFlight
   class EventLog    
     attr_reader(:events)
     

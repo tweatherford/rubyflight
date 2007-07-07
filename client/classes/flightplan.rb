@@ -1,4 +1,4 @@
-module OpenFS
+module RubyFlight
   class FlightPlan
     attr_reader(:from)    # the ICAO code for the departing airport
     attr_reader(:to)      # the ICAO code for the arrival airport
