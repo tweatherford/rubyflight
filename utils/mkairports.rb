@@ -10,14 +10,11 @@ CSV.open(ARGV.first, 'r') do |row|
   lat = row[2].to_f; long = row[3].to_f
   code = row[0].to_sym
   
-  entry = [ code, lat, long ]
-  if (!runways.key?(lat.to_i)) then runways[lat.to_i] = {} end
-  
+  if (!runways.key?(lat.to_i)) then runways[lat.to_i] = {} end  
   longs = runways[lat.to_i]
-  if (!longs.key?(long.to_i)) then longs[long.to_i] = [ entry.dup ]
-  elsif !longs[long.to_i].any?{|e| e[0] == code} then
-    longs[long.to_i].push(entry.dup)
-  end
+  if (!longs.key?(long.to_i)) then longs[long.to_i] = {} end
+  entries = longs[long.to_i]
+  if (!entries.key?(code)) then entries[code] = [ lat, long ] end
 end
 
 puts "Dumping"

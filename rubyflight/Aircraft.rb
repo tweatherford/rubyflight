@@ -97,13 +97,10 @@ module RubyFlight
       if (longitudes.nil?) then puts "no lat"; return false end
       entries = longitudes[long.to_i]
       if (entries.nil?) then puts "no long"; return false end
+      pos = entries[code]
+      if (pos.nil?) then puts "no airport"; return false end
       
-      res = entries.find {|entry|
-        puts entry[0].to_s;
-        entry[0] == code && Position.new(entry[1], entry[2]).distance_to(pos).abs <= radius        
-      }
-      puts res
-      return !res.nil?
+      return Position.new(pos[0], pos[1]).distance_to(pos).abs <= radius 
     end
     
     # In knots
