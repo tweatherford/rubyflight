@@ -1,4 +1,4 @@
-require 'rubyflightclasses'
+require 'rubyflight/interface'
 
 begin
   sim = RubyFlight::Simulator.instance
