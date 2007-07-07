@@ -6,6 +6,23 @@ module RubyFlight
       @vars = RubyFlight::Variables.instance
     end
     
+#    def level
+#      [:left,:center,:right].each |side|
+#        [:main,
+#    end
+#    
+#    def level(side, type)
+#      if (
+#      var = "tank_#{side}_#{type}_level".to_sym
+#      @vars.get(var, 4, :uint) / (128.0 * 65536.0)
+#    end
+#    
+#    def capacity(side, type)
+#      var = "tank_#{side}_#{type}_capacity".to_sym
+#      @vars.get(var, 4, :uint)
+#    end
+    
+    # TODO: units?
     def flow(engine_number = 1)
       @aircraft = RubyFlight::Aircraft.instance    
       if (1 <= engine_number && engine_number <= @aircraft.engines.number)

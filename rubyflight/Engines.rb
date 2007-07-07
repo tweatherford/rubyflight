@@ -1,7 +1,7 @@
 module RubyFlight
   class Engines
     include Enumerable
-    
+
     def initialize
       @vars = RubyFlight::Variables::instance
     end

@@ -2,12 +2,9 @@ module RubyFlight
   class Weather
     include Singleton 
     
-    def initialize
-      @vars = RubyFlight::Variables.instance
-    end
-    
+    # in milibars
     def qnh
-      @vars.get(:qnh,0,:real)
+      RubyFlight::Variables.instance.get(:qnh,0,:real)
     end
   end
 end
