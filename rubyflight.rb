@@ -1,7 +1,0 @@
-require 'RubyFlight'
-require 'rubyflight/Interface'
-require 'rubyflight/Aircraft'
-require 'rubyflight/Position'
-require 'rubyflight/Thrust'
-require 'rubyflight/Simulator'
-require 'rubyflight/misc'

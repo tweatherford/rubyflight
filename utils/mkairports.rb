@@ -11,10 +11,12 @@ CSV.open(ARGV.first, 'r') do |row|
   code = row[0].to_sym
   
   entry = [ code, lat, long ]
-  if (!runways.key?(lat.to_i)) then runways[lat.to_i] = Hash.new end
-  if (!runways[lat.to_i].key?(long.to_i)) then runways[lat.to_i][long.to_i] = [ entry ]
-  elsif !runways[lat.to_i][long.to_i].any? {|entry| entry[0] == code} then
-    runways[lat.to_i][long.to_i].push(entry)
+  if (!runways.key?(lat.to_i)) then runways[lat.to_i] = {} end
+  
+  longs = runways[lat.to_i]
+  if (!longs.key?(long.to_i)) then longs[long.to_i] = [ entry.dup ]
+  elsif !longs[long.to_i].any?{|e| e[0] == code} then
+    longs[long.to_i].push(entry.dup)
   end
 end
 

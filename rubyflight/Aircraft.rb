@@ -4,14 +4,16 @@ module RubyFlight
   class Aircraft
     include Singleton
     
-    attr_reader(:thrust)
+    attr_reader(:engines,:fuel)
     def initialize
-      @thrust = Thrust.new
-			@vars = Variables::instance()
+      @vars = Variables::instance()
+      @engines = Engines.new
+      @fuel = Fuel.new
+      @airports = File.open('airports.dump', 'r') {|io| airports = Marshal.load(io)}
     end
     
     def latitude
-			offset = @vars.offset(:latitude)
+      offset = @vars.offset(:latitude)
       low = @vars.get(offset, 4, :uint).to_f / (65536.0 * 65536.0)
       high = @vars::get(offset + 4, 4, :int).to_f
       res = (high < 0 ? high - low : high + low)
@@ -19,51 +21,53 @@ module RubyFlight
     end
     
     def longitude
-			offset = @vars.offset(:longitude)			
+      offset = @vars.offset(:longitude)			
       low = @vars.get(offset, 4, :uint).to_f / (65536.0 * 65536.0)
       high = @vars.get(offset + 4, 4, :int).to_f
       res = (high < 0 ? high - low : high + low)
       return res * (360.0 / (65536.0 * 65536.0)) 
     end
     
-    # In degrees (Float)
+    # in degrees (Float)
     def heading
-			@vars.get(:heading, 4, :uint).to_f * (360.0/(65536.0 * 65536.0))
+      @vars.get(:heading, 4, :uint).to_f * (360.0/(65536.0 * 65536.0))
     end
     
-    # TODO: see this (Float)
+    # in degrees (Float), positive is down, negative is up
     def pitch
-			raise RuntimeError("Not finished")			
-      #getInt(PITCH_OFFSET, 4)
-      RubyFlight::getReal(0x2e98)
+      @vars.get(:pitch, 4, :int) * (360.0 / (65536.0 * 65536.0))
     end
     
-    # In degrees, positive to the right, negative to the left (Float)
+    # in degrees, positive to the right, negative to the left (Float)
     def bank
       @vars.get(:bank, 4, :int).to_f * (360.0 / (65536.0 * 65536.0))
     end
     
-    # TODO: How should I read this?
+    # in metres (same as ground_altitude + radio_altitude)
     def altitude
-			raise RuntimeError("Not finished")
-      #unit = RubyFlight::getUInt(ALTITUDE_OFFSET + 4, 4)
-      #fract = RubyFlight::getUInt(ALTITUDE_OFFSET, 4)
-      #puts "unit #{unit}, fract #{fract}"
+      offset = @vars.offset(:altitude)
+      unit = @vars.get(offset + 4, 4, :uint).to_f * 10  # TODO: is this *10 correct?
+      fract = @vars.get(offset, 4, :uint).to_f  / (65536.0 * 65536.0)
+      return (unit < 0 ? unit - fract : unit + fract)
     end
     
-    # In metres
+    # in metres
     def ground_altitude
       @vars.get(:ground_altitude, 4, :uint) / 256.0
     end
     
-    # In metres
+    # in metres
     def radio_altitude
       @vars.get(:radio_altitude, 4, :uint) / 65536.0
     end
     
-    # This is not updated on slew mode
+    # this is not updated on slew mode
     def on_ground?
       @vars.get(:on_ground, 2, :uint) == 1
+    end
+    
+    def airborne?
+      !self.on_ground?
     end
     
     def engines_off?
@@ -82,20 +86,24 @@ module RubyFlight
     # one runways is considered for each airport. This method loads the pre-dumped
     # airports db every time it is called to save memory (loading is fast)
     def near_airport?(code, radius)
-      airports = nil
-      File.open('airports.dump', 'r') {|io| airports = Marshal.load(io)}
+      #airports = nil
+      airports = @airports
+      #File.open('airports.dump', 'r') {|io| airports = Marshal.load(io)}
       lat = self.latitude
       long = self.longitude
       pos = Position.new(lat, long)      
       
       longitudes = airports[lat.to_i]
-      if (longitudes.nil?) then return false end
+      if (longitudes.nil?) then puts "no lat"; return false end
       entries = longitudes[long.to_i]
-      if (entries.nil?) then return false end
+      if (entries.nil?) then puts "no long"; return false end
       
-      entries.find {|entry|
+      res = entries.find {|entry|
+        puts entry[0].to_s;
         entry[0] == code && Position.new(entry[1], entry[2]).distance_to(pos).abs <= radius        
       }
+      puts res
+      return !res.nil?
     end
     
     # In knots
@@ -105,12 +113,35 @@ module RubyFlight
     
     # In knots
     def true_airspeed
-			@vars.get(:tas, 4, :int) / 128.0
+      @vars.get(:tas, 4, :int) / 128.0
     end
     
     # In metres/sec (not updated in slew mode)
     def ground_speed
-			@vars.get(:ground_speed, 4, :int) / 65536.0
+      @vars.get(:ground_speed, 4, :int) / 65536.0
+    end
+    
+    def doors_open?
+      @vars.get(:doors_open, 1, :uint) == 1
+    end
+    
+    def altimeter
+      @vars.get(:altimeter, 2, :uint) / 16.0
+    end
+    
+    # vertical speed (m/s) updated constantly
+    def vertical_speed_ms
+      
+    end
+    
+    # vertical speed (ft/m)
+    def vertical_speed
+      (@vars.get(:vs, 4, :int) / 256.0).meters_to_feet * 60.0
+    end
+    
+    # vertical speed (ft/m) updated only while (airborne? == true)
+    def last_vertical_speed
+      (@vars.get(:vs_last, 4, :int) / 256.0).meters_to_feet * 60.0
     end
   end
 end
