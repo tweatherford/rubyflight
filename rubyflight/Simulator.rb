@@ -16,11 +16,11 @@ module RubyFlight
     end
     
     def connect
-      RubyFlight.connect()
+      RubyFlight.fsConnect()
     end
     
     def disconnect
-      RubyFlight.disconnect()
+      RubyFlight.fsDisconnect()
     end
     
     def initialized?

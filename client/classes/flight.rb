@@ -4,11 +4,11 @@ include Automaton
 module RubyFlight
   class Flight
     MIN_TAXI_SPEED=5
-    MAX_TAXI_SPEED=25
-    MIN_ASCENDING_ALTITUDE=250
+    MAX_TAXI_SPEED=30
+    MIN_ASCENDING_ALTITUDE=400
     CRUISE_ALTITUDE_MARGIN=2000
     DESCENT_FROM_CRUISE_DISTANCE=7000
-    MIN_DESCENDING_ALTITUDE=250
+    MIN_DESCENDING_ALTITUDE=800
     
     def initialize(flightplan)
       @flightplan = flightplan
@@ -60,6 +60,12 @@ module RubyFlight
     def abort
       @invalidated = true
     end
+    
+    def to_xml
+      flight_element = REXML::Element.new('flight')
+      flight_element << EventLog.instance.to_xml
+      return flight_element
+    end    
     
   private
     ## Starting    
@@ -184,13 +190,6 @@ module RubyFlight
     
     def while_ended
       puts "while ended"
-    end
-    
-    ## Other methods
-    def to_xml
-      flight_element = REXML::Element.new('flight')
-      flight_element << EventLog.instance.to_xml
-      return flight_element
     end
   end
 end

@@ -13,6 +13,7 @@ begin
   sim.show_message("RubyFlight is working =]", 10)
   aircraft = RubyFlight::Aircraft.instance
   weather = RubyFlight::Weather.instance
+  vars = RubyFlight::Variables.instance
   
   while (true)
     if (!ARGV.first.nil?) then
@@ -28,9 +29,9 @@ begin
     puts "Ground Altitude: #{aircraft.ground_altitude}"    
     puts "On Ground? #{aircraft.on_ground?}"
     puts "Parking Break? #{aircraft.parking_brake?}"
-    puts "Ground Speed: #{aircraft.ground_speed} m/s"    
     puts "Vertical Speed: #{aircraft.vertical_speed} ft/m"
     puts "Last Vertical Speed: #{aircraft.last_vertical_speed} ft/m"            
+    puts "Ground Speed: #{aircraft.ground_speed} knots"        
     puts "TAS: #{aircraft.true_airspeed} kts"        
     puts "IAS: #{aircraft.indicated_airspeed} kts"        
     puts "Pushing Back?: #{aircraft.pushing_back?}"            
@@ -38,10 +39,18 @@ begin
     puts "Longitude: #{aircraft.longitude}"                
     puts "Fuel valves open?: #{aircraft.engines.all? {|n| aircraft.fuel.valve_open?(n)}}"
     puts "Fuel flow zero?: #{aircraft.engines.all? {|n| aircraft.fuel.near_zero_flow?(n)}}"    
+    puts "Fuel center level/capacity: #{aircraft.fuel.individual_level(:center)}/#{aircraft.fuel.individual_capacity(:center)}"
+    aircraft.fuel.each_tank do |side,type|
+      puts "Fuel #{side} #{type} level/capacity: #{aircraft.fuel.individual_level(side,type)}/#{aircraft.fuel.individual_capacity(side,type)}"
+    end
+    puts "Total Fuel capacity: #{aircraft.fuel.capacity}"        
+    puts "Total Fuel level: #{aircraft.fuel.level}"        
     puts "----"
     sleep(0.25)
   end    
   
+rescue RubyFlight::RubyFlightError => e
+  puts "RubyFlight Error: #{e.code}"
 rescue RuntimeError => e
   puts "Runtime Error! (code: #{e.message})"
 ensure

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <flightplan>
-  <from code="SABE"/>
-  <to code="SAEZ"/>
-  <cruise level="18000"/>
+  <from code="KSEA"/>
+  <to code="KSEA"/>
+  <cruise level="20000"/>
 </flightplan>

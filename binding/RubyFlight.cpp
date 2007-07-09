@@ -1,16 +1,10 @@
 #include <windows.h>
 #include <iostream>
-#include <string>
 #include "FSUIPC_User.h"
 #include "RubyFlightError.h"
+#include "RubyFlight_PreparedVar.h"
 using namespace std;
 
-typedef unsigned char UINT8;
-typedef unsigned short UINT16;
-typedef signed char INT8;
-typedef signed short INT16;
-
-#include "RubyFlight_PreparedVar.h"
 
 /**
  * Local Vars
@@ -36,23 +30,23 @@ void doProcess(void) {
 	DWORD error_code = 0;
 	if (!FSUIPC_Process(&error_code)) throw RubyFlightError(error_code);
 }
-	
-void doRead(unsigned long offset, unsigned long size, void* data) {
+
+void doRead(unsigned long offset, unsigned long size, void* data, bool process = true) {
 	DWORD error_code = 0;
 	if (!FSUIPC_Read(offset, size, data, &error_code)) throw RubyFlightError(error_code);
+	if (process) doProcess();
+}
+
+void doWrite(unsigned long offset, unsigned long size, void* data) {
+	DWORD error_code = 0;
+	if (!FSUIPC_Write(offset, size, data, &error_code)) throw RubyFlightError(error_code);
 	doProcess();
 }
 
-void doWrite(unsigned long offset, unsigned long size, void* data, bool no_process = false) {
-	DWORD error_code = 0;
-	if (!FSUIPC_Write(offset, size, data, &error_code)) throw RubyFlightError(error_code);
-	doProcess();	
-}
-
 void prepareRead(unsigned long offset, unsigned long size, FSType type) {
-	PreparedVar var(offset, size, type);
-	prepared_vars[offset] = var;
-	doRead(offset, size, vat.ptr(), true);
+	pair<unsigned long, PreparedVar> new_pair(offset, PreparedVar(offset, size, type));
+	prepared_vars.insert(new_pair);
+	doRead(offset, size, prepared_vars.find(offset)->second.ptr(), false);
 }
 
 void unprepareRead(unsigned long offset) {
@@ -66,7 +60,7 @@ void unprepareRead(unsigned long offset) {
 
 signed long getInt(unsigned long offset, unsigned long size) {
 	signed long output = 0;
-	
+
 	var_it it = prepared_vars.find(offset);
 	if (it == prepared_vars.end()) {
 		switch(size) {
@@ -77,11 +71,12 @@ signed long getInt(unsigned long offset, unsigned long size) {
 		}
 	}
 	else {
+		cout << "using saved var" << endl;
 		PreparedVar& var = it->second;
 		switch(var.size) {
-			case 1: { INT8	data = 0; output = var.data.int8; } break;
-			case 2: { INT16 data = 0; output = var.data.int16; } break;
-			case 4: { INT32 data = 0; output = var.data.int32; } break;
+			case 1: output = var.data.int8; break;
+			case 2: output = var.data.int16; break;
+			case 4: output = var.data.int32; break;
 			default: throw RubyFlightError(FSUIPC_ERR_DATA); break;
 		}
 	}
@@ -102,13 +97,14 @@ unsigned long getUInt(unsigned long offset, unsigned long size) {
 		}
 	}
 	else {
+		cout << "using saved var" << endl;
 		PreparedVar& var = it->second;
 		switch(var.size) {
-			case 1: { UINT8	data = 0; output = var.data.uint8; } break;
-			case 2: { UINT16 data = 0; output = var.data.uint16; } break;
-			case 4: { UINT32 data = 0; output = var.data.uint32; } break;
+			case 1: output = var.data.uint8; break;
+			case 2: output = var.data.uint16; break;
+			case 4: output = var.data.uint32; break;
 			default: throw RubyFlightError(FSUIPC_ERR_DATA); break;
-		}		
+		}
 	}
 
 	return output;
@@ -116,7 +112,7 @@ unsigned long getUInt(unsigned long offset, unsigned long size) {
 
 double getReal(unsigned long offset) {
 	double output = 0.0;
-	
+
 	var_it it = prepared_vars.find(offset);
 	if (it == prepared_vars.end()) doRead(offset, 8, &output);
 	else { output = it->second.data.real; }
@@ -131,7 +127,7 @@ string getString(unsigned long offset, unsigned long size) {
 		buf[255] = '\0';
 		return buf;
 	}
-	else return it->second.str;
+	else return it->second.data.str;
 }
 
 /**

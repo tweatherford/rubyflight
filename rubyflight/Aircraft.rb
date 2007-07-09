@@ -48,8 +48,7 @@ module RubyFlight
       offset = @vars.offset(:altitude)
       unit = @vars.get(offset + 4, 4, :uint).to_f 
       fract = @vars.get(offset, 4, :uint).to_f  / (65536.0 * 65536.0)
-      return (unit < 0 ? unit - fract : unit + fract).meters_to_feet
-      # * 10 TODO: is this *10 correct?
+      return (unit < 0 ? unit - fract : unit + fract)
     end
     
     # in feet
@@ -90,10 +89,11 @@ module RubyFlight
       if (longitudes.nil?) then puts "no lat"; return false end
       entries = longitudes[long.to_i]
       if (entries.nil?) then puts "no long"; return false end
+      puts entries.keys.join(',')
       pos = entries[code]
       if (pos.nil?) then puts "no airport"; return false end
       
-      return Position.new(pos[0], pos[1]).distance_to(pos).abs <= radius 
+      return Position.new(pos[0], pos[1]).distance_to(Position.new(pos[0], pos[1])).abs <= radius 
     end
     
     # In knots
@@ -106,9 +106,9 @@ module RubyFlight
       @vars.get(:tas, 4, :int) / 128.0
     end
     
-    # In ft/m (not updated in slew mode)
+    # In knots (not updated in slew mode)
     def ground_speed
-      (@vars.get(:ground_speed, 4, :int) / 65536.0).meters_to_feet * 60.0
+      (@vars.get(:ground_speed, 4, :int) / (1852.0 * 65536.0)) * 3600.0
     end
     
     def doors_open?
@@ -122,12 +122,12 @@ module RubyFlight
     
     # vertical speed (ft/m)
     def vertical_speed
-      (@vars.get(:vs, 4, :int) / 256.0).meters_to_feet * 60.0
+      (@vars.get(:vs, 4, :int) / (256.0 * 60.0)).meters_to_feet
     end
     
     # vertical speed (ft/m) updated only while (airborne? == true)
     def last_vertical_speed
-      (@vars.get(:vs_last, 4, :int) / 256.0).meters_to_feet * 60.0
+      (@vars.get(:vs_last, 4, :int) / (60.0 * 256.0)).meters_to_feet
     end
   end
 end

@@ -1,5 +1,7 @@
 module RubyFlight
-  class EventLog    
+  class EventLogger
+    include Singleton
+    
     attr_reader(:events)
     
     def initialize

@@ -12,6 +12,7 @@
 
 %catches(RubyFlightError) prepareRead(unsigned long offset, unsigned long size, FSType type);
 %catches(RubyFlightError) unprepareRead(unsigned long offset);
+%catches(RubyFlightError) doProcess(void);
 
 %catches(RubyFlightError) getInt(unsigned long offset, unsigned long size);
 %catches(RubyFlightError) getUInt(unsigned long offset, unsigned long size);

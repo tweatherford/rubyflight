@@ -5,22 +5,32 @@ module RubyFlight
     def initialize
       @vars = RubyFlight::Variables.instance
     end
+
+    # Individual tank's level (0.0 to 1.0), side can be :center,:left,:right; type can be :main,:aux,:tip (if side is not :center)
+    def individual_level(side, type = :main)
+      var = (side == :center ? "tank_center_level" : "tank_#{side}_#{type}_level").to_sym
+      @vars.get(var, 4, :int) / (128.0 * 65536.0)
+    end
     
-#    def level
-#      [:left,:center,:right].each |side|
-#        [:main,
-#    end
-#    
-#    def level(side, type)
-#      if (
-#      var = "tank_#{side}_#{type}_level".to_sym
-#      @vars.get(var, 4, :uint) / (128.0 * 65536.0)
-#    end
-#    
-#    def capacity(side, type)
-#      var = "tank_#{side}_#{type}_capacity".to_sym
-#      @vars.get(var, 4, :uint)
-#    end
+    # Individual tank's capacity (in Gallons), parameters as above
+    def individual_capacity(side, type = :main)
+      var = (side == :center ? "tank_center_capacity" : "tank_#{side}_#{type}_capacity").to_sym    
+      @vars.get(var, 4, :int)
+    end
+    
+    # The total capacity of tanks in Gallons
+    def capacity
+      res = individual_capacity(:center)
+      self.each_tank {|side,type| res += individual_capacity(side, type)}
+      return res
+    end
+    
+    # The total level of fuel in _Gallons_
+    def level
+      res = individual_level(:center) * individual_capacity(:center)
+      self.each_tank {|side,type| res += individual_level(side, type) * individual_capacity(side, type)}
+      return res
+    end
     
     # TODO: units?
     def flow(engine_number = 1)
@@ -46,6 +56,15 @@ module RubyFlight
     
     def valve_closed?(engine_number = 1)
       !valve_open?(engine_number)
+    end
+    
+    # Calls the block for each side/type combination (:center is not included)
+    def each_tank
+      [:left,:right].each do |side|
+        [:main,:aux,:tip].each do |type|
+          yield(side,type)
+        end
+      end
     end
   end
 end

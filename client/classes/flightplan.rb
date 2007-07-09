@@ -7,16 +7,16 @@ module RubyFlight
     def initialize(attributes)
       @from = attributes['from']['code'].to_sym
       @to = attributes['to']['code'].to_sym
-      @cruise_altitude = attributes['cruise'].to_i
+      @cruise_altitude = attributes['cruise']['level'].to_i
     end
     
     def FlightPlan.from_xml(file)
       attributes = {}      
       doc = File.open(file,'r') {|io| REXML::Document.new(io)}
       
-      doc.each_element('flightplan') do |elem|
+      doc.each_element('flightplan/*') do |elem|
         if (!attributes.key?(elem.name)) then attributes[elem.name] = {} end
-        elem.attributes.each {|key,value| attributes[key] = value}
+        elem.attributes.each {|key,value| attributes[elem.name][key] = value}
       end
       
       FlightPlan.new(attributes)
