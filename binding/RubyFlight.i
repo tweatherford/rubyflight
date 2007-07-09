@@ -7,11 +7,15 @@
 
 %include "std_string.i"
 
-%catches(RubyFlightError) fs_connect(void);
-%catches(RubyFlightError) fs_disconnect(void);
+%catches(RubyFlightError) fsConnect(void);
+%catches(RubyFlightError) fsDisconnect(void);
+
+%catches(RubyFlightError) prepareRead(unsigned long offset, unsigned long size, FSType type);
+%catches(RubyFlightError) unprepareRead(unsigned long offset);
 
 %catches(RubyFlightError) getInt(unsigned long offset, unsigned long size);
 %catches(RubyFlightError) getUInt(unsigned long offset, unsigned long size);
+%catches(RubyFlightError) getReal(unsigned long offset);
 %catches(RubyFlightError) getString(unsigned long offset, unsigned long size);
 
 %catches(RubyFlightError) setInt(unsigned long offset, unsigned long size, signed long value);
@@ -20,8 +24,6 @@
 %catches(RubyFlightError) setString(unsigned long offset, unsigned long size, const std::string& value);
 
 %rename("code") RubyFlightError::getCode();
-%rename("connect") fs_connect(void);
-%rename("disconnect") fs_disconnect(void);
 
 %{
 #include "RubyFlight.h"
