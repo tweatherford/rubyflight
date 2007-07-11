@@ -16,10 +16,7 @@ begin
   vars = RubyFlight::Variables.instance
   
   while (true)
-    vars.offsets.each do |key,value|
-      vars.prepare(key)
-    end
-    process
+    vars.prepare_all; vars.process
     
     if (!ARGV.first.nil?) then
       puts "In #{ARGV.first}?: #{aircraft.near_airport?(ARGV.first.to_sym,2)}"
@@ -44,6 +41,7 @@ begin
     puts "Longitude: #{aircraft.longitude}"                
     puts "Fuel valves open?: #{aircraft.engines.all? {|n| aircraft.fuel.valve_open?(n)}}"
     puts "Fuel flow zero?: #{aircraft.engines.all? {|n| aircraft.fuel.near_zero_flow?(n)}}"    
+    puts "Fuel flow each: #{aircraft.engines.map {|n| aircraft.fuel.flow(n)}.join('-')}"
     puts "Fuel center level/capacity: #{aircraft.fuel.individual_level(:center)}/#{aircraft.fuel.individual_capacity(:center)}"
     aircraft.fuel.each_tank do |side,type|
       puts "Fuel #{side} #{type} level/capacity: #{aircraft.fuel.individual_level(side,type)}/#{aircraft.fuel.individual_capacity(side,type)}"
@@ -56,8 +54,6 @@ begin
   
 rescue RubyFlight::RubyFlightError => e
   puts "RubyFlight Error: #{e.code}"
-rescue RuntimeError => e
-  puts "Runtime Error! (code: #{e.message})"
 ensure
   sim.disconnect
   puts "Disconnected"

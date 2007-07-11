@@ -24,7 +24,7 @@ module RubyFlight
     end
     
     def initialized?
-      return @vars.get(:initialized,2,:uint) == 0xFADE
+      return @vars.get(:initialized) == 0xFADE
     end
   end
 end

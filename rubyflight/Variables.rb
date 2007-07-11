@@ -31,6 +31,10 @@ module RubyFlight
       end
     end
     
+    def prepare_all
+      offsets.each {|key,value| prepare(key)}        
+    end
+    
     def prepare(var)
       if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end      
       offset,size,type = @offsets[var]

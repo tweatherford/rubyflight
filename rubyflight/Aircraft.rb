@@ -9,21 +9,20 @@ module RubyFlight
       @vars = Variables::instance()
       @engines = Engines.new
       @fuel = Fuel.new
-      @airports = File.open('airports.dump', 'r') {|io| airports = Marshal.load(io)}
+      @airports = nil
     end
     
     def latitude
       fract = @vars.get(:latitude_fract).to_f / (65536.0 * 65536.0)
       unit = @vars::get(:latitude_unit).to_f
-      res = (unit < 0 ? unit - low : unit + low)
+      res = (unit < 0 ? unit - fract : unit + fract)
       return res * (90.0 / 10001750.0)
     end
     
     def longitude
-      offset = @vars.offset(:longitude)			
-      low = @vars.get(:lontiude_fract).to_f / (65536.0 * 65536.0)
-      high = @vars.get(:longitude_unit).to_f
-      res = (unit < 0 ? unit - low : unit + low)
+      fract = @vars.get(:longitude_fract).to_f / (65536.0 * 65536.0)
+      unit = @vars.get(:longitude_unit).to_f
+      res = (unit < 0 ? unit - fract : unit + fract)
       return res * (360.0 / (65536.0 * 65536.0)) 
     end
     
@@ -79,6 +78,11 @@ module RubyFlight
     # If it is near (given a radius in miles) a given airport. Note that only
     # one runways is considered for each airport
     def near_airport?(code, radius)
+      if (@airports.nil?) then
+        puts "Loading airports database"
+        @airports = File.open('airports.dump', 'r') {|io| Marshal.load(io)}
+      end
+      
       lat = self.latitude
       long = self.longitude
       pos = Position.new(lat, long)      
@@ -87,11 +91,16 @@ module RubyFlight
       if (longitudes.nil?) then puts "no lat"; return false end
       entries = longitudes[long.to_i]
       if (entries.nil?) then puts "no long"; return false end
-      puts entries.keys.join(',')
       pos = entries[code]
       if (pos.nil?) then puts "no airport"; return false end
       
       return Position.new(pos[0], pos[1]).distance_to(Position.new(pos[0], pos[1])).abs <= radius 
+    end
+    
+    # this "unloads" the airports database (which is un-marshaled by near_airport? when needed)
+    def unload_airports
+      puts "Unloading airports database"
+      @airports = nil
     end
     
     # In knots
@@ -120,12 +129,12 @@ module RubyFlight
     
     # vertical speed (ft/m)
     def vertical_speed
-      (@vars.get(:vs) / (256.0 * 60.0)).meters_to_feet
+      (@vars.get(:vs) / 256.0).meters_to_feet * 60.0
     end
     
     # vertical speed (ft/m) updated only while (airborne? == true)
     def last_vertical_speed
-      (@vars.get(:vs_last) / (60.0 * 256.0)).meters_to_feet
+      (@vars.get(:vs_last) / 256.0).meters_to_feet * 60.0
     end
   end
 end

@@ -19,7 +19,10 @@ begin
   flightplan = RubyFlight::FlightPlan.from_xml('flightplan.xml')
   flight = RubyFlight::Flight.new(flightplan)
   
+  vars = RubyFlight::Variables.instance
+  
   while !flight.ended? && flight.valid?
+    vars.prepare_all; vars.process  
     flight.process
   end
     
@@ -29,7 +32,7 @@ begin
     File.open('flight.xml','w') do |io|
       doc = REXML::Document.new
       doc << flight.to_xml
-      doc.write(io, 2, true)
+      doc.write(io, 2, false)
     end
   end
   

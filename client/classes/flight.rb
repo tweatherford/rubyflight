@@ -9,20 +9,20 @@ module RubyFlight
     CRUISE_ALTITUDE_MARGIN=2000
     DESCENT_FROM_CRUISE_DISTANCE=7000
     MIN_DESCENDING_ALTITUDE=800
+    SLEEP_TIME=0.01
     
     def initialize(flightplan)
       @flightplan = flightplan
       @plane = RubyFlight::Aircraft.instance()
       @invalidated = false
       @touchdown_speed = nil
-      @sleep_time = 0.5
       
       initial_transition = Transition.new(:start, method(:start), method(:can_start?))
       states = {
         :start   => State.new([ Transition.new(:taxi_departure, method(:start_departure_taxi), method(:seems_taxing?)) ],
                               method(:while_started), lambda { !seems_taxing? }),
         :taxi_departure => State.new([ Transition.new(:takeoff, method(:start_takeoff), method(:seems_taking_off?)) ],
-                                     method(:while_taxing_departure), lambda { !seems_taking_off? }),
+                              method(:while_taxing_departure), lambda { !seems_taking_off? }),
         :takeoff => State.new([ Transition.new(:ascent, method(:start_ascent), method(:seems_ascending?)) ],
                               method(:while_taking_off), lambda { !seems_ascending? }),
         :ascent  => State.new([ Transition.new(:cruise, method(:start_cruise), method(:seems_cruising?)) ],
@@ -34,7 +34,7 @@ module RubyFlight
         :landing => State.new([ Transition.new(:taxi_arrival, method(:start_arrival_taxi), method(:seems_taxing?)) ],
                               method(:while_landing), lambda { !seems_taxing? }),
         :taxi_arrival => State.new([ Transition.new(:end, method(:finish), method(:seems_ended?)) ],
-                                   method(:while_taxing_arrival), lambda { !seems_ended? }),
+                              method(:while_taxing_arrival), lambda { !seems_ended? }),
         :end     => State.new([], method(:while_ended))                                   
       }
       @fsm = FSM.new(initial_transition, states)      
@@ -51,7 +51,7 @@ module RubyFlight
     # must be called periodically to process the flight state
     def process
       @fsm.process
-      sleep(@sleep_time)
+      sleep(SLEEP_TIME)
     end
     
     def valid?
@@ -64,11 +64,12 @@ module RubyFlight
     
     def to_xml
       flight_element = REXML::Element.new('flight')
-      flight_element << EventLog.instance.to_xml
+      flight_element << EventLogger.instance.to_xml
       return flight_element
     end    
     
   private
+    ######### FSM Actions / Conditions #############
     ## Starting    
     def can_start?
       return @plane.on_ground? && @plane.parking_brake? &&
@@ -79,6 +80,7 @@ module RubyFlight
     
     def start
       puts "start"
+      @plane.unload_airports
       EventLogger.instance.log('flight_start', 'initial_fuel' => @plane.fuel.level)
     end
     
@@ -159,36 +161,30 @@ module RubyFlight
     
     def start_landing
       puts "start landing"
-      @vars.prepare(:on_ground, :last_va)
-      @sleep_time, @old_sleep_time = 0.01, @sleep_time
     end
     
     def while_landing
       puts "while landing"
       check_touchdown_speed
     end
+    
+    def check_touchdown_speed
+      if (@touchdown_speed.nil?) then
+        if @plane.on_ground? then
+          @touchdown_speed = @plane.last_vertical_speed
+          puts "touchdown estimated at #{@touchdown_speed} kts"
+          EventLogger.instance.log(:touchdown, { 'speed' => @touchdown_speed })
+        end
+      end
+    end    
 
     # Arrival Taxi
     def start_arrival_taxi
       puts "start taxi out"
-      check_touchdown_speed
     end
 
     def while_taxing_arrival
       puts "taxiing out"
-    end
-    
-    def check_touchdown_speed
-      if (@touchdown_speed.nil?) then
-        @vars.process
-        if @plane.on_ground? then
-          @touchdown_speed = @plane.last_vertical_speed
-          puts "touchdown estimated at #{@touchdown_speed} kts"
-          @sleep_time = @old_sleep_time
-          EventLogger.instance.log(:touchdown, { 'speed' => @touchdown_speed })
-          @vars.forget(:on_ground, :last_va)
-        end
-      end
     end
     
     # End
@@ -198,18 +194,40 @@ module RubyFlight
       @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)})
     end
     
-    def finish
-      @sleep_time = @old_sleep_time
-      
+    def finish      
       puts "finish"
       EventLogger.instance().log(:flight_end, {
         'final_fuel' => @plane.fuel.level,
         'correct_airport' => @plane.near_airport?(@flightplan.to, 2)
       })
+      @plane.unload_airports
     end
     
     def while_ended
       puts "while ended"
+    end
+    
+    ########### General Checks / Functions ############
+    def check_flying_quality
+      # check: cg, vertical speed, horizontal speed, bank/pitch angles
+    end
+    
+    def check_weather
+      # strong winds, precipitation, visibility
+      # temperature: failure of moving surfaces (specially if de-ice is off), pitot (if pitot-deice is off)      
+    end
+    
+    def landing_surface
+      # check autobrakes
+    end
+    
+    def check_doors
+      # with altitude: for depresurization (plane should move violently for a second), passengers
+      # would die (server side) after a while if above 10000ft
+    end
+    
+    def check_lights
+      #...
     end
   end
 end

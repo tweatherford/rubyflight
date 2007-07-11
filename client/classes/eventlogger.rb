@@ -24,13 +24,14 @@ module RubyFlight
     
     def initialize(name, params)
       @name = name
-      @time = Time.now.to_f  # TODO: this time should be MSFS's
+      @time = Time.now.to_i  # TODO: this time should be MSFS's (pause and that)
       @params = params
     end
     
     def to_xml
       elem = REXML::Element.new(@name.to_s)
       elem.add_attributes(@params.map)
+      elem.add_atribute('when' => @time)
       return elem
     end
   end
