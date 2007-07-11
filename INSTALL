@@ -10,6 +10,10 @@ You'll need to get swig, nmake and ruby on your PATH variable. The nmake part
 is done by running a file called vcvars32.bat or something like that. You
 should configure VC6 to get the correct paths to the Include/Lib dirs and such.
 
+Also, you'll need the get-text package for windows (only the iconv.dll is
+necessary). Copy the dll to you system32 dir (or put it in the same dir as
+client.rb).
+
 = Installation
 Open an MS-DOS console and go to src/. Then:
   swig -c++ -ruby -Wall RubyFlight.i

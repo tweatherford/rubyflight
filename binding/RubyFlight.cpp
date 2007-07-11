@@ -44,8 +44,10 @@ void doWrite(unsigned long offset, unsigned long size, void* data) {
 }
 
 void prepareRead(unsigned long offset, unsigned long size, FSType type) {
-	pair<unsigned long, PreparedVar> new_pair(offset, PreparedVar(offset, size, type));
-	prepared_vars.insert(new_pair);
+	if (prepared_vars.find(offset) == prepared_vars.end) {
+		pair<unsigned long, PreparedVar> new_pair(offset, PreparedVar(offset, size, type));
+		prepared_vars.insert(new_pair);
+	}
 	doRead(offset, size, prepared_vars.find(offset)->second.ptr(), false);
 }
 

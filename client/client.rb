@@ -21,7 +21,6 @@ begin
   
   while !flight.ended? && flight.valid?
     flight.process
-    sleep(0.5)
   end
     
   if (!flight.valid?) then puts "Flight aborted!"

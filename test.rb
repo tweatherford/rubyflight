@@ -16,6 +16,11 @@ begin
   vars = RubyFlight::Variables.instance
   
   while (true)
+    vars.offsets.each do |key,value|
+      vars.prepare(key)
+    end
+    process
+    
     if (!ARGV.first.nil?) then
       puts "In #{ARGV.first}?: #{aircraft.near_airport?(ARGV.first.to_sym,2)}"
     end
@@ -46,7 +51,7 @@ begin
     puts "Total Fuel capacity: #{aircraft.fuel.capacity}"        
     puts "Total Fuel level: #{aircraft.fuel.level}"        
     puts "----"
-    sleep(0.25)
+    sleep(0.01)
   end    
   
 rescue RubyFlight::RubyFlightError => e

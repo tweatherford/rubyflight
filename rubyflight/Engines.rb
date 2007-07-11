@@ -7,7 +7,7 @@ module RubyFlight
     end
     
     def number
-      @vars.get(:engines_number, 2, :int)
+      @vars.get(:engines_number)
     end
     
     def each

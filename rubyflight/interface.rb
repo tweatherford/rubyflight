@@ -1,5 +1,6 @@
 require 'RubyFlight'
 require 'singleton'
+require 'rubyflight/Offsets'
 require 'rubyflight/Variables'
 require 'rubyflight/Aircraft'
 require 'rubyflight/Position'

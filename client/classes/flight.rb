@@ -14,8 +14,8 @@ module RubyFlight
       @flightplan = flightplan
       @plane = RubyFlight::Aircraft.instance()
       @invalidated = false
-      @initial_fuel = nil
-      @used_fuel = nil
+      @touchdown_speed = nil
+      @sleep_time = 0.5
       
       initial_transition = Transition.new(:start, method(:start), method(:can_start?))
       states = {
@@ -51,6 +51,7 @@ module RubyFlight
     # must be called periodically to process the flight state
     def process
       @fsm.process
+      sleep(@sleep_time)
     end
     
     def valid?
@@ -158,19 +159,36 @@ module RubyFlight
     
     def start_landing
       puts "start landing"
+      @vars.prepare(:on_ground, :last_va)
+      @sleep_time, @old_sleep_time = 0.01, @sleep_time
     end
     
     def while_landing
       puts "while landing"
+      check_touchdown_speed
     end
-    
+
     # Arrival Taxi
     def start_arrival_taxi
       puts "start taxi out"
+      check_touchdown_speed
     end
-        
+
     def while_taxing_arrival
       puts "taxiing out"
+    end
+    
+    def check_touchdown_speed
+      if (@touchdown_speed.nil?) then
+        @vars.process
+        if @plane.on_ground? then
+          @touchdown_speed = @plane.last_vertical_speed
+          puts "touchdown estimated at #{@touchdown_speed} kts"
+          @sleep_time = @old_sleep_time
+          EventLogger.instance.log(:touchdown, { 'speed' => @touchdown_speed })
+          @vars.forget(:on_ground, :last_va)
+        end
+      end
     end
     
     # End
@@ -181,6 +199,8 @@ module RubyFlight
     end
     
     def finish
+      @sleep_time = @old_sleep_time
+      
       puts "finish"
       EventLogger.instance().log(:flight_end, {
         'final_fuel' => @plane.fuel.level,

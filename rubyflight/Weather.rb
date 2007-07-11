@@ -4,7 +4,7 @@ module RubyFlight
     
     # in milibars
     def qnh
-      RubyFlight::Variables.instance.get(:qnh,0,:real)
+      RubyFlight::Variables.instance.get(:qnh)
     end
   end
 end
