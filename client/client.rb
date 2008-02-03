@@ -1,4 +1,3 @@
-$:.push('..')
 require 'rubyflight'
 require 'classes/flight'
 require 'classes/flightplan'
