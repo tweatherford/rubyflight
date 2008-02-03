@@ -1,5 +1,5 @@
 $:.push('..')
-require 'rubyflight/interface'
+require 'rubyflight'
 require 'classes/flight'
 require 'classes/flightplan'
 require 'classes/eventlogger'
