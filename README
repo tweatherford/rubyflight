@@ -1,0 +1,14 @@
+= Usage
+
+You just do
+  require 'rflight'
+Everything is under the RubyFlight module.
+Note: I used 'rflight' so that the RubyFlight name of the C extension wouldn't
+conflict with rubyflight.rb (on windows they're the same thing).
+
+= Testing & Example
+
+There's a test.rb file which is a tinty client application to FS using
+RubyFlight. You can use this as an example. To run this, just do
+  ruby test.rb
+with FS open, and you'll get a periodical reading of various FS variables.
