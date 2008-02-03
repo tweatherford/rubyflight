@@ -68,6 +68,14 @@ module RubyFlight
       !self.on_ground?
     end
     
+    def crashed?
+      @vars.get(:crashed) == 1
+    end
+    
+    def crashed_off_runway?
+      @vars.get(:crashed_off_runway) == 1
+    end
+    
     def parking_brake?
       @vars.get(:parking_brake) == 32767
     end
@@ -137,6 +145,43 @@ module RubyFlight
     # vertical speed (ft/m) updated only while (airborne? == true)
     def last_vertical_speed
       (@vars.get(:vs_last) / 256.0).meters_to_feet * 60.0
+    end
+    
+    # Unknown units
+    # TODO: check if values can be negative (ie: if high values get negative, the value is uint)
+    def gforce
+      @vars.get(:gforce) / 625.0
+    end
+    
+    # Left/Right, relative to Body Axis, in ft/(s^2)
+    def lateral_acceleration
+      @vars.get(:lateral_acceleration)
+    end
+    
+    # Up/Down, relative to Body Axis, in ft/(s^2)
+    def vertical_acceleration
+      @vars.get(:lateral_acceleration)
+    end
+    
+    # Forward/Backward, relative to Body Axis, in ft/(s^2)
+    def longitudinal_acceleration
+      @vars.get(:lateral_acceleration)
+    end
+    
+    # Returns :normal, :wet, :icy or :snowed
+    # *NOTE*: Probably only updated when #on_ground?
+    def surface_condition
+      case @vars.get(:surface_condition)
+      when 0; return :normal
+      when 1; return :wet
+      when 2; return :icy
+      when 3; return :snowed
+      end
+    end
+    
+    # true if the corresponding switch is on
+    def structural_deice?
+      @vars.get(:structural_deice) == 1
     end
   end
 end

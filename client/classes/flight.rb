@@ -207,7 +207,7 @@ module RubyFlight
     
     def check_weather
       # strong winds, precipitation, visibility
-      # temperature: failure of moving surfaces (specially if de-ice is off), pitot (if pitot-deice is off)      
+      # temperature: failure of moving surfaces (specially if de-ice is off)
     end
     
     def landing_surface

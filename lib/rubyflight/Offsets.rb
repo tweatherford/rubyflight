@@ -22,6 +22,10 @@ module RubyFlight
         :altimeter => [ 0x330, 2, :uint ],
         :vs_last => [ 0x30C, 4, :int ],
         :vs => [ 0x2c8, 4, :int],
+        :crashed => [ 0x840, 2, :uint ], :crashed_off_runway => [ 0x848, 2, :uint ],
+        :gforce => [ 0x11BA, 2, :int ],
+        :lateral_acceleration => [ 0x3060, 0, :real ], :vertical_acceleration => [ 0x3068, 0, :real ], :longitudinal_acceleration => [ 0x3070, 0, :real ], 
+        :structural_deice => [ 0x337D, 1, :uint ],
         
         :engines_number => [ 0xAEC, 2, :int ],
         
@@ -38,7 +42,12 @@ module RubyFlight
         :qnh => [ 0x34A0, 0, :real ],
         
         :message => [ 0x3380, 0, :string ], :send_message => [ 0x32FA, 0, :string ],
-        :initialized => [ 0x4D6, 2, :uint ]
+        :initialized => [ 0x4D6, 2, :uint ], :simulation_rate => [ 0xC1A, 2, :uint ],
+        
+        :time_local_hour => [ 0x238, 1, :uint ], :time_local_minute => [ 0x239, 1, :uint ], :time_second => [ 0x23A, 1, :uint ], 
+        :time_gmt_hour => [ 0x23B, 1, :uint ], :time_gmt_minute => [ 0x23C, 1, :uint ],
+        :time_day => [ 0x23E, 2, :uint ], :time_year => [ 0x240, 2, :uint ],
+        :timezone => [ 0x246, 2, :int ], :season => [ 0x248, 2, :uint ]
       }
     end
   end

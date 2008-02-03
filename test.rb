@@ -48,6 +48,14 @@ begin
     end
     puts "Total Fuel capacity: #{aircraft.fuel.capacity}"        
     puts "Total Fuel level: #{aircraft.fuel.level}"        
+    puts "G-Force: #{aircraft.gforce}"
+    puts "Accelerations (lat, vert, long): (#{aircraft.lateral_acceleration}, #{aircraft.vertical_acceleration}, #{aircraft.longitudinal_acceleration}"
+    puts "Surface Condition: #{aircraft.surface_condition}"
+    puts "Structural de-ice?: #{aircraft.structural_deice?}"
+    puts "Simulator UTC Time: #{sim.utctime}"
+    puts "Simulator Local Time: #{sim.localtime}"
+    puts "Simulator Season: #{sim.season}"
+    puts "Simulation rate: #{sim.simulation_rate}"
     puts "----"
     sleep(0.01)
   end    
