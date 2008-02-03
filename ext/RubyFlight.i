@@ -24,6 +24,8 @@
 %catches(RubyFlightError) setReal(unsigned long offset, double value);
 %catches(RubyFlightError) setString(unsigned long offset, unsigned long size, const std::string& value);
 
+%rename("connect") fsConnect(void);
+%rename("disconnect") fsDisconnect(void);
 %rename("code") RubyFlightError::getCode();
 
 %{
