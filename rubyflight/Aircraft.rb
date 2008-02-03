@@ -63,6 +63,7 @@ module RubyFlight
       @vars.get(:on_ground) == 1
     end
     
+    # Opposite of on_ground?
     def airborne?
       !self.on_ground?
     end
@@ -76,7 +77,8 @@ module RubyFlight
     end
     
     # If it is near (given a radius in miles) a given airport. Note that only
-    # one runways is considered for each airport
+    # one runways is considered for each airport.
+    # NOTE: you need to create an 'airports.dump' file in your current directory.
     def near_airport?(code, radius)
       if (@airports.nil?) then
         puts "Loading airports database"

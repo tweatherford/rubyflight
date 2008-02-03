@@ -1,4 +1,6 @@
 module RubyFlight
+  # Class handling communication to C interface to MSFS. 
+  # FIXME: move something most of this to C
   class Variables
     include Singleton
     include Offsets

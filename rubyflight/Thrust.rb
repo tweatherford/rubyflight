@@ -1,4 +1,5 @@
 module RubyFlight
+  # FIXME: not finished
   class Thrust
     def value
       raise RuntimeError.new("Not implemented")

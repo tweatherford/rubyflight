@@ -1,3 +1,6 @@
+= TODO
+
+- Move offsets to C
 - A class that allows having a condition and a timer. This would be called
 periodically. When the condition is true, time is counted. When it is called
 and the time is > than the time specified, a block is called.

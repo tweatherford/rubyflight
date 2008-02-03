@@ -25,14 +25,14 @@ module RubyFlight
       return res
     end
     
-    # The total level of fuel in _Gallons_
+    # The total level of fuel in Gallons
     def level
       res = individual_level(:center) * individual_capacity(:center)
       self.each_tank {|side,type| res += individual_level(side, type) * individual_capacity(side, type)}
       return res
     end
     
-    # TODO: units?
+    # FIXME: units?
     def flow(engine_number = 1)
       @aircraft = RubyFlight::Aircraft.instance    
       if (1 <= engine_number && engine_number <= @aircraft.engines.number)
@@ -40,7 +40,7 @@ module RubyFlight
       end
     end
     
-    # used to test flow as being near-to-zero 
+    # used to test flow as being near-to-zero (values below MIN_FLOW are considered as 0)
     def near_zero_flow?(engine_number = 1)
       self.flow(engine_number) < MIN_FLOW
     end    
@@ -57,6 +57,7 @@ module RubyFlight
     end
     
     # Calls the block for each side/type combination (:center is not included)
+    # FIXME: why isn't center included?
     def each_tank
       [:left,:right].each do |side|
         [:main,:aux,:tip].each do |type|
