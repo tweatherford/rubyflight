@@ -1,24 +1,26 @@
 = Requirements
 Since this is a Windows-only extension (it wouldn't make sense otherwise), you
-need to get SWIG for windows first (called swigwin on swig's site). Then, get
-Ruby for windows (either the "binary" version, or the one-click installer).
-Finally, the ugliest part, you need to compile this with VC6 (Visual C++ 6),
-it wont work with newer VC versions (this is sort of a Ruby issue, and a SWIG
+need:
+ * SWIG for windows (called swigwin on swig's site)
+ * Ruby for Windows
+ * VC6
+ * FSUIPC SDK
+I recommend the One-Click installer, as it will require less work.
+If you download the binary version, you need the get-text package for windows
+(only the iconv.dll is necessary). Copy this dll to you system32 dir (or put it in the
+same dir as client.rb).
+
+The bad thing is that you need VC6 (Visual C++ 6), as it
+wont work with newer VC versions (this is sort of a Ruby issue, and a SWIG
 problem with nmake). Tell me if you think it should be solved by now.
 
 You'll need to get SWIG, nmake and ruby on your PATH variable. The nmake part
 is done by running a file called vcvars32.bat or something like that. You
 should configure VC6 to get the correct paths to the Include/Lib dirs and such.
 
-Also, you'll need the get-text package for windows (only the iconv.dll is
-necessary). Copy the dll to you system32 dir (or put it in the same dir as
-client.rb).
-
 = Source Installation
-Open an MS-DOS console and go to src/. Then:
-  swig -c++ -ruby -Wall RubyFlight.i
-  ruby extconf.rb
-  nmake install
-  
-Then, copy the 'rubyflight' directory and the 'rubyflight.rb' file into the
-lib/site_ruby directory of Ruby.
+
+After installing/configuring the previous software, you need to put the IPCuser.c,
+IPCuser.h and FSUIPC_User.h files on the ext/ directory. Then, just do:
+  ruby setup.rb
+Which will do config (create the C extension), setup and install.

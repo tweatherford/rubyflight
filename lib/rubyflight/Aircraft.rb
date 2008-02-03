@@ -6,7 +6,7 @@ module RubyFlight
     
     attr_reader(:engines,:fuel)
     def initialize
-      @vars = Variables::instance()
+      @vars = Variables.instance
       @engines = Engines.new
       @fuel = Fuel.new
       @airports = nil
