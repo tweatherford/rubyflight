@@ -1,0 +1,1 @@
+rdoc -U -w 2 -S -m README lib/*.rb lib/rubyflight/*.rb INSTALL TODO README

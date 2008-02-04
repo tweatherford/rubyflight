@@ -14,6 +14,9 @@ begin
   aircraft = RubyFlight::Aircraft.instance
   weather = RubyFlight::Weather.instance
   vars = RubyFlight::Variables.instance
+  failures = RubyFlight::Failures.instance
+  
+  # failures.free_flaps
   
   while (true)
     vars.prepare_all; vars.process
@@ -56,6 +59,8 @@ begin
     puts "Simulator Local Time: #{sim.localtime}"
     puts "Simulator Season: #{sim.season}"
     puts "Simulation rate: #{sim.simulation_rate}"
+    puts "Gears Up?: all: #{aircraft.gears.up?}, right: #{aircraft.gears.up?(:right)}, left: #{aircraft.gears.up?(:left)}, nose: #{aircraft.gears.up?(:nose)}"
+    puts "Brake pressure: left: #{aircraft.left_brake} right: #{aircraft.right_brake}"
     puts "----"
     sleep(0.01)
   end    

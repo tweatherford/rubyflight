@@ -4,11 +4,12 @@ module RubyFlight
   class Aircraft
     include Singleton
     
-    attr_reader(:engines,:fuel)
+    attr_reader(:engines,:gears,:fuel)
     def initialize
       @vars = Variables.instance
       @engines = Engines.new
       @fuel = Fuel.new
+      @gears = Gears.new
       @airports = nil
     end
     
@@ -79,10 +80,12 @@ module RubyFlight
     def parking_brake?
       @vars.get(:parking_brake) == 32767
     end
+    alias_method :parked?, :parking_brake?
     
     def pushing_back?
       @vars.get(:pushback) != 3
     end
+    alias_method :pushback?, :pushing_back?
     
     # If it is near (given a radius in miles) a given airport. Note that only
     # one runways is considered for each airport.
@@ -180,8 +183,39 @@ module RubyFlight
     end
     
     # true if the corresponding switch is on
+    # TODO: doesn't seem to work, be sure
     def structural_deice?
       @vars.get(:structural_deice) == 1
+    end
+    
+    # If _set_value_ is nil, the current left brake pressure (0.0 to 1.0) is returned.
+    # Else, the value supplied is set as braking pressure. If _fixed_ is true, the value will remaing set until
+    # changed with this method. Otherwise, it will act as pressure applied by pilot and it will decay with time.
+    # *NOTE*: if parked?, it will report full pressure.
+    # *NOTE 2*: the value returned by this method has less resolution than the value used if fixed is false
+    def left_brake(set_value = nil, fixed = false)
+      if (set_value.nil?) then @vars.get(:left_brake) / 32767.0
+      elsif (fixed) then @vars.set(:left_brake, (set_value * 32767).round)
+      else @vars.set(:left_brake_pressure, (set_value * 200).round) end
+    end
+    
+    # Analogous to #left_brake
+    def right_brake(set_value = nil, fixed = false)
+      if (set_value.nil?) then @vars.get(:right_brake) / 32767.0
+      elsif (fixed) then @vars.set(:right_brake, (set_value * 32767).round)
+      else @vars.set(:right_brake_pressure, (set_value * 200).round) end
+    end
+    
+    # Calls #left_brake and #right_brake. If set_value is not nil, the brake pressure
+    # is returned as a two-element array (left and right)
+    def both_brakes(set_value = nil, fixed = false)
+      [ left_brake(set_value, fixed), right_brake(set_value, fixed) ]
+    end
+    
+    # Almost an alias for both_brakes. This method allows you to apply non-fixed brakes easily.
+    # e.g.: You can just call "brake" to brake.
+    def brake(set_value = 1.0)
+      both_brakes(set_value)
     end
   end
 end

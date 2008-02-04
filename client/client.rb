@@ -1,4 +1,4 @@
-require 'rubyflight'
+require 'rflight'
 require 'classes/flight'
 require 'classes/flightplan'
 require 'classes/eventlogger'
@@ -30,8 +30,9 @@ begin
     puts "Flight Done. Saving."
     File.open('flight.xml','w') do |io|
       doc = REXML::Document.new
+      doc << REXML::XMLDecl.default
       doc << flight.to_xml
-      doc.write(io, 2, false)
+      doc.write(io, 2, true)
     end
   end
   

@@ -47,23 +47,20 @@ module RubyFlight
       h = @vars.get(:time_gmt_hour)
       m = @vars.get(:time_gmt_minute)
       s = @vars.get(:time_second)
-      Time.utc(y, Date.ordinal(y,d).day, h, m, s)
+      date = Date.ordinal(y,d)
+      Time.utc(y, date.month, date.day, h, m, s)
     end
     
     # Return a Time object containing the current Simulator local time
-    # *NOTE*: the object is created using Time#utc and adding the corresponding offset of the current timezone,
+    # *NOTE*: the object is created using the #utctime and adding the timezone offset,
     # since I can't create a Time object with an arbitrary timezone with Time. Keep this in mind when substracting times, and such.
     def localtime
-      y = @vars.get(:time_year)
-      d = @vars.get(:time_day)
-      h = @vars.get(:time_local_hour)
-      m = @vars.get(:time_local_minute)
-      s = @vars.get(:time_second)
       of = @vars.get(:timezone)
-      Time.utc(y, Date.ordinal(y,d).day, h, m, s) + of * 60
+      self.utctime - of * 60
     end
     
     # Returns :winter, :spring, :summer or :fall
+    # *NOTE*: this is relative to the northern hemisphere
     def season
       case @vars.get(:season)
       when 0; return :winter

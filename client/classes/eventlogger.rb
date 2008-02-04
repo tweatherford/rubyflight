@@ -30,8 +30,8 @@ module RubyFlight
     
     def to_xml
       elem = REXML::Element.new(@name.to_s)
-      elem.add_attributes(@params.map)
-      elem.add_atribute('when' => @time)
+      @params.each_pair {|k,v| elem.add_attribute(k.to_s, v.to_s)}
+      elem.add_attribute('when', @time.to_s)
       return elem
     end
   end

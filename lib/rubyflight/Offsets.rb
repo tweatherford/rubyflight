@@ -25,7 +25,12 @@ module RubyFlight
         :crashed => [ 0x840, 2, :uint ], :crashed_off_runway => [ 0x848, 2, :uint ],
         :gforce => [ 0x11BA, 2, :int ],
         :lateral_acceleration => [ 0x3060, 0, :real ], :vertical_acceleration => [ 0x3068, 0, :real ], :longitudinal_acceleration => [ 0x3070, 0, :real ], 
-        :structural_deice => [ 0x337D, 1, :uint ],
+        :structural_deice => [ 0x337D, 1, :uint ], :surface_condition => [ 0x31EC, 4, :uint ],
+        :hydraulic_failures => [ 0x32F8, 1, :uint ],
+        :gear_control => [ 0xBE8, 4, :uint], 
+        :nose_gear_control => [ 0xBEC, 4, :uint], :right_gear_control => [ 0xBF4, 4, :uint], :left_gear_control => [ 0xBF0, 4, :uint], 
+        :left_brake => [ 0xBC4, 2, :uint ], :right_brake => [ 0xBC6, 2, :uint ],
+        :left_brake_pressure => [ 0xC00, 1, :uint ], :right_brake_pressure => [ 0xC01, 1, :uint ],
         
         :engines_number => [ 0xAEC, 2, :int ],
         

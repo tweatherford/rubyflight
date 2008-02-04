@@ -11,6 +11,7 @@ module RubyFlight
     SLEEP_TIME=0.01
     
     include FSM::Abbreviate
+    attr_reader(:fsm)
     
     def initialize(flightplan)
       @flightplan = flightplan
@@ -26,7 +27,7 @@ module RubyFlight
     end
     
     def ended?
-      @fsm.state == :end
+      @fsm.state == :finished
     end
     
     # must be called periodically to process the flight state
@@ -49,7 +50,7 @@ module RubyFlight
       return flight_element
     end    
     
-  private
+  protected
     ######### FSM Actions / Conditions #############
     ## Starting    
     def can_start?
@@ -60,6 +61,7 @@ module RubyFlight
     end
     
     def while_not_started
+      puts "Flight not prepared, waiting"
       if (can_start?) then start(:preparing) end
     end
             
@@ -210,8 +212,18 @@ module RubyFlight
       # temperature: failure of moving surfaces (specially if de-ice is off)
     end
     
-    def landing_surface
-      # check autobrakes
+    # Apply brakes differently according to surface
+    def check_landing_surface
+      surface = @plane.landing_surface
+      if (@plane.on_ground? && surface != :normal)
+        case surface
+        when :wet; max_pressure = 0.5
+        when :icy; max_pressure = 0.1
+        when :snowed; max_pressure = 0.3
+        left_brake_pressure, right_brake_pressure = plane.both_brakes
+        if (left_brake_pressure > max_pressure) then plane.left_brake(max_pressure) end
+        if (right_brake_pressure > max_pressure) then plane.right_brake(max_pressure) end        
+      end
     end
     
     def check_doors

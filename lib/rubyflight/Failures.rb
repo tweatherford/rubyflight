@@ -1,5 +1,12 @@
 module RubyFlight
   class Failures
+    include Singleton
+    
+    def initialize
+      @vars = Variables.instance
+    end
+    
+# TODO: move the following to a FailureGenerator or something
 #    def initialize(failures = {})
 #      @failures = failures
 #    end
