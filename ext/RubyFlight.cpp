@@ -36,13 +36,13 @@ static void do_write(unsigned long offset, unsigned long size, void* data) {
  */
 void prepare_read(unsigned long offset, unsigned long size, FSType type) {
 	if (type == FS_REAL) size = 8;
-	
+
 	var_it it = prepared_vars.find(offset);
 	if (it == prepared_vars.end()) {
 		pair<unsigned long, PreparedVar> new_pair(offset, PreparedVar(offset, size, type));
 		it = prepared_vars.insert(new_pair).first;
 	}
-	
+
 	DWORD error_code = 0;
 	if (!FSUIPC_Read(offset, size, it->second.ptr(), &error_code)) throw RubyFlightError(error_code);
 }
@@ -104,7 +104,7 @@ double get_real(unsigned long offset) {
 
 string get_string(unsigned long offset, unsigned long size) {
 	var_it it = prepared_vars.find(offset);
-	if (it == prepared_vars.end()) throw RubyFlightError(FSUIPC_ERR_DATA);	
+	if (it == prepared_vars.end()) throw RubyFlightError(FSUIPC_ERR_DATA);
 	return it->second.data.str;
 }
 

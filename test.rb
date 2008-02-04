@@ -3,6 +3,13 @@ require 'rflight'
 begin
   sim = RubyFlight::Simulator.instance
   sim.connect
+  
+  vars = RubyFlight::Variables.instance
+  aircraft = RubyFlight::Aircraft.instance
+  weather = RubyFlight::Weather.instance  
+  failures = RubyFlight::Failures.instance
+ 
+  vars.read_all
   if (!sim.initialized?) 
     $stderr.puts "Connected, but not initialized, something strange happened"
     exit(1)
@@ -11,10 +18,6 @@ begin
   end
   
   sim.show_message("RubyFlight is working =]", 10)
-  aircraft = RubyFlight::Aircraft.instance
-  weather = RubyFlight::Weather.instance
-  vars = RubyFlight::Variables.instance
-  failures = RubyFlight::Failures.instance
   
   # failures.free_flaps
   
@@ -45,14 +48,14 @@ begin
     puts "Fuel valves open?: #{aircraft.engines.all? {|n| aircraft.fuel.valve_open?(n)}}"
     puts "Fuel flow zero?: #{aircraft.engines.all? {|n| aircraft.fuel.near_zero_flow?(n)}}"    
     puts "Fuel flow each: #{aircraft.engines.map {|n| aircraft.fuel.flow(n)}.join('-')}"
-    puts "Fuel center level/capacity: #{aircraft.fuel.individual_level(:center)}/#{aircraft.fuel.individual_capacity(:center)}"
+    puts "Fuel center level/capacity: #{aircraft.fuel.individual_level(:center) * 100}% of #{aircraft.fuel.individual_capacity(:center)}"
     aircraft.fuel.each_tank do |side,type|
-      puts "Fuel #{side} #{type} level/capacity: #{aircraft.fuel.individual_level(side,type)}/#{aircraft.fuel.individual_capacity(side,type)}"
+      puts "Fuel #{side} #{type} level/capacity: #{aircraft.fuel.individual_level(side,type) * 100}% of #{aircraft.fuel.individual_capacity(side,type)}"
     end
     puts "Total Fuel capacity: #{aircraft.fuel.capacity}"        
     puts "Total Fuel level: #{aircraft.fuel.level}"        
     puts "G-Force: #{aircraft.gforce}"
-    puts "Accelerations (lat, vert, long): (#{aircraft.lateral_acceleration}, #{aircraft.vertical_acceleration}, #{aircraft.longitudinal_acceleration}"
+    puts "Accelerations (lat, vert, long): (#{aircraft.lateral_acceleration}, #{aircraft.vertical_acceleration}, #{aircraft.longitudinal_acceleration})"
     puts "Surface Condition: #{aircraft.surface_condition}"
     puts "Structural de-ice?: #{aircraft.structural_deice?}"
     puts "Simulator UTC Time: #{sim.utctime}"
@@ -65,8 +68,6 @@ begin
     sleep(0.01)
   end    
   
-rescue RubyFlight::RubyFlightError => e
-  puts "RubyFlight Error: #{e.code}"
 ensure
   sim.disconnect
   puts "Disconnected"
