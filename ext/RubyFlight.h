@@ -3,22 +3,22 @@
 
 #include <string>
 
-void fsConnect(void);
-void fsDisconnect(void);
+void fs_connect(void);
+void fs_disconnect(void);
 
 enum FSType { FS_UINT, FS_INT, FS_REAL, FS_STRING };
-void prepareRead(unsigned long offset, unsigned long size, FSType type);
-void unprepareRead(unsigned long offset);
-void doProcess(void);
+void prepare_read(unsigned long offset, unsigned long size, FSType type);
+void unprepare_read(unsigned long offset);
+void process(void);
 
-signed long getInt(unsigned long offset, unsigned long size);
-unsigned long getUInt(unsigned long offset, unsigned long size);
-double getReal(unsigned long offset);
-std::string getString(unsigned long offset, unsigned long size);
+signed long get_int(unsigned long offset, unsigned long size);
+unsigned long get_uint(unsigned long offset, unsigned long size);
+double get_real(unsigned long offset);
+std::string get_string(unsigned long offset, unsigned long size);
 
-void setInt(unsigned long offset, unsigned long size, signed long value);
-void setUInt(unsigned long offset, unsigned long size, unsigned long value);
-void setReal(unsigned long offset, double value);
-void setString(unsigned long offset, unsigned long size, const std::string& value);
+void set_int(unsigned long offset, unsigned long size, signed long value);
+void set_uint(unsigned long offset, unsigned long size, unsigned long value);
+void set_real(unsigned long offset, double value);
+void set_string(unsigned long offset, unsigned long size, const std::string& value);
 
 #endif

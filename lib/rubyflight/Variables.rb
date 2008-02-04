@@ -14,10 +14,10 @@ module RubyFlight
       offset,size,type = @offsets[var]
       
       case type
-      when :int; RubyFlight::getInt(offset, size)
-      when :uint; RubyFlight::getUInt(offset, size)
-      when :real; RubyFlight::getReal(offset)
-      when :string; RubyFlight::getString(offset, size)
+      when :int; RubyFlight::get_int(offset, size)
+      when :uint; RubyFlight::get_uint(offset, size)
+      when :real; RubyFlight::get_real(offset)
+      when :string; RubyFlight::get_string(offset, size)
       end    
     end
     
@@ -26,15 +26,11 @@ module RubyFlight
       offset,size,type = @offsets[var]
       
       case type
-      when :int; RubyFlight::setInt(offset, size, value.to_i)
-      when :uint; RubyFlight::setUInt(offset, size, value.to_i)
-      when :real; RubyFlight::setReal(offset, value.to_f)
-      when :string; RubyFlight::setString(offset, passed_size, value.to_s)
+      when :int; RubyFlight::set_int(offset, size, value.to_i)
+      when :uint; RubyFlight::set_uint(offset, size, value.to_i)
+      when :real; RubyFlight::set_real(offset, value.to_f)
+      when :string; RubyFlight::set_string(offset, passed_size, value.to_s)
       end
-    end
-    
-    def prepare_all
-      offsets.each {|key,value| prepare(key)}        
     end
     
     def prepare(var)
@@ -47,17 +43,22 @@ module RubyFlight
       when :real; type = FS_REAL
       when :string; type = FS_STRING
       end
-      RubyFlight::prepareRead(offset, size, type)
+      RubyFlight::prepare_read(offset, size, type)
+    end
+    
+    def read_all
+      offsets.each {|key,value| prepare(key)}
+      process()
     end
     
     def process
-      RubyFlight::doProcess
+      RubyFlight::process
     end
     
     def forget(var)
       if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
       offset, = @offsets[var]
-      RubyFlight::unprepareRead(offset)
+      RubyFlight::unprepare_read(offset)
     end
   end
 end

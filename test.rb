@@ -18,8 +18,8 @@ begin
   
   # failures.free_flaps
   
-  while (true)
-    vars.prepare_all; vars.process
+  loop do
+    vars.read_all
     
     if (!ARGV.first.nil?) then
       puts "In #{ARGV.first}?: #{aircraft.near_airport?(ARGV.first.to_sym,2)}"

@@ -7,26 +7,26 @@
 
 %include "std_string.i"
 
-%catches(RubyFlightError) fsConnect(void);
-%catches(RubyFlightError) fsDisconnect(void);
+%catches(RubyFlightError) fs_connect(void);
+%catches(RubyFlightError) fs_disconnect(void);
 
-%catches(RubyFlightError) prepareRead(unsigned long offset, unsigned long size, FSType type);
-%catches(RubyFlightError) unprepareRead(unsigned long offset);
-%catches(RubyFlightError) doProcess(void);
+%catches(RubyFlightError) prepare_read(unsigned long offset, unsigned long size, FSType type);
+%catches(RubyFlightError) unprepare_read(unsigned long offset);
+%catches(RubyFlightError) process(void);
 
-%catches(RubyFlightError) getInt(unsigned long offset, unsigned long size);
-%catches(RubyFlightError) getUInt(unsigned long offset, unsigned long size);
-%catches(RubyFlightError) getReal(unsigned long offset);
-%catches(RubyFlightError) getString(unsigned long offset, unsigned long size);
+%catches(RubyFlightError) get_int(unsigned long offset, unsigned long size);
+%catches(RubyFlightError) get_uint(unsigned long offset, unsigned long size);
+%catches(RubyFlightError) get_real(unsigned long offset);
+%catches(RubyFlightError) get_string(unsigned long offset, unsigned long size);
 
-%catches(RubyFlightError) setInt(unsigned long offset, unsigned long size, signed long value);
-%catches(RubyFlightError) setUInt(unsigned long offset, unsigned long size, unsigned long value);
-%catches(RubyFlightError) setReal(unsigned long offset, double value);
-%catches(RubyFlightError) setString(unsigned long offset, unsigned long size, const std::string& value);
+%catches(RubyFlightError) set_int(unsigned long offset, unsigned long size, signed long value);
+%catches(RubyFlightError) set_uint(unsigned long offset, unsigned long size, unsigned long value);
+%catches(RubyFlightError) set_real(unsigned long offset, double value);
+%catches(RubyFlightError) set_string(unsigned long offset, unsigned long size, const std::string& value);
 
-%rename("connect") fsConnect(void);
-%rename("disconnect") fsDisconnect(void);
-%rename("code") RubyFlightError::getCode();
+%rename("connect") fs_connect(void);
+%rename("disconnect") fs_disconnect(void);
+%rename("code") RubyFlightError::get_code();
 
 %{
 #include "RubyFlight.h"
