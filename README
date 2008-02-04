@@ -1,10 +1,8 @@
 = Usage
 
 You just do
-  require 'rflight'
+  require 'rubyflight'
 Everything is under the RubyFlight module.
-Note: I used 'rflight' so that the RubyFlight name of the C extension wouldn't
-conflict with rubyflight.rb (on windows they're the same thing).
 
 = Testing & Example
 

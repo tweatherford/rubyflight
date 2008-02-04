@@ -2,19 +2,21 @@
 #define __RUBYFLIGHT_VARS_H__
 
 #include <map>
-#include "rubyflight.h"
+#include <ruby.h>
 
 typedef unsigned char UINT8;
 typedef unsigned short UINT16;
 typedef signed char INT8;
 typedef signed short INT16;
 
+enum FSType { FS_UINT, FS_INT, FS_REAL, FS_STRING };
+
 class Variable {
 	public:
 		Variable(unsigned long offset, unsigned long size, FSType type);
-		Variable(const PreparedVar& other);
+		Variable(const Variable& other);
 		~Variable(void);
-	
+
 		void prepare(void);
 		void* ptr(void);
 
@@ -38,6 +40,7 @@ class Variable {
 };
 
 typedef std::map<ID, Variable>::iterator var_it;
+typedef std::map<ID, Variable>::const_iterator const_var_it;
 
 
 

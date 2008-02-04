@@ -45,5 +45,5 @@ void* Variable::ptr(void) {
 
 void Variable::prepare(void) {
 	DWORD error_code = 0;
-	if (!FSUIPC_Read(offset, size, ptr(), &error_code)) throw RubyFlightError(error_code);
+	if (!FSUIPC_Read(offset, size, ptr(), &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
 }

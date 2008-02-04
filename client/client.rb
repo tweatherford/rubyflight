@@ -1,4 +1,4 @@
-require 'rflight'
+require 'rubyflight'
 require 'classes/flight'
 require 'classes/flightplan'
 require 'classes/eventlogger'
@@ -6,7 +6,11 @@ require 'rexml/document'
 
 begin
   sim = RubyFlight::Simulator.instance
-  sim.connect()
+  
+  puts "Connecting to MSFS..."
+  sim.connect
+  RubyFlight.read_all
+  
   if (!sim.initialized?) 
     $stderr.puts "Connected, but not initialized, something strange happened"
     exit(1)
@@ -18,10 +22,8 @@ begin
   flightplan = RubyFlight::FlightPlan.from_xml('flightplan.xml')
   flight = RubyFlight::Flight.new(flightplan)
   
-  vars = RubyFlight::Variables.instance
-  
   while !flight.ended? && flight.valid?
-    vars.prepare_all; vars.process  
+    RubyFlight.read_all
     flight.process
   end
     

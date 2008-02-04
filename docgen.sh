@@ -1,2 +1,2 @@
 #!/bin/sh
-rdoc -U -w 2 -S -m README rubyflight/*.rb INSTALL TODO README
+rdoc -U -w 2 -S -m README lib/*.rb lib/rubyflight/*.rb ext/rubyflight_binding.cpp INSTALL TODO README

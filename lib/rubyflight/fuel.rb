@@ -1,21 +1,17 @@
 module RubyFlight
   class Fuel
     MIN_FLOW=0.7
-    
-    def initialize
-      @vars = RubyFlight::Variables.instance
-    end
 
     # Individual tank's level (0.0 to 1.0), side can be :center,:left,:right; type can be :main,:aux,:tip (if side is not :center)
     def individual_level(side, type = :main)
       var = (side == :center ? "tank_center_level" : "tank_#{side}_#{type}_level").to_sym
-      @vars.get(var) / (128.0 * 65536.0)
+      RubyFlight.get(var) / (128.0 * 65536.0)
     end
     
     # Individual tank's capacity (in Gallons), parameters as above
     def individual_capacity(side, type = :main)
       var = (side == :center ? "tank_center_capacity" : "tank_#{side}_#{type}_capacity").to_sym    
-      @vars.get(var)
+      RubyFlight.get(var)
     end
     
     # The total capacity of tanks in Gallons
@@ -36,7 +32,7 @@ module RubyFlight
     def flow(engine_number = 1)
       @aircraft = RubyFlight::Aircraft.instance    
       if (1 <= engine_number && engine_number <= @aircraft.engines.number)
-        @vars.get("fuel_flow_#{engine_number}".to_sym)
+        RubyFlight.get("fuel_flow_#{engine_number}".to_sym)
       end
     end
     
@@ -48,7 +44,7 @@ module RubyFlight
     def valve_open?(engine_number = 1)
       @aircraft = RubyFlight::Aircraft.instance    
       if (1 <= engine_number && engine_number <= @aircraft.engines.number)
-        @vars.get("fuel_valve_#{engine_number}".to_sym)
+        RubyFlight.get("fuel_valve_#{engine_number}".to_sym)
       end      
     end
     

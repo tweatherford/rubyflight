@@ -220,6 +220,7 @@ module RubyFlight
         when :wet; max_pressure = 0.5
         when :icy; max_pressure = 0.1
         when :snowed; max_pressure = 0.3
+        end
         left_brake_pressure, right_brake_pressure = plane.both_brakes
         if (left_brake_pressure > max_pressure) then plane.left_brake(max_pressure) end
         if (right_brake_pressure > max_pressure) then plane.right_brake(max_pressure) end        

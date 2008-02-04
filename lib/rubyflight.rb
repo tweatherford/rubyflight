@@ -1,7 +1,5 @@
-require 'RubyFlight'
 require 'singleton'
-require 'rubyflight/offsets'
-require 'rubyflight/variables'
+require 'rubyflight_binding'
 require 'rubyflight/aircraft'
 require 'rubyflight/fuel'
 require 'rubyflight/engines'

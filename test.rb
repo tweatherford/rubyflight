@@ -1,15 +1,14 @@
-require 'rflight'
+require 'rubyflight'
 
 begin
   sim = RubyFlight::Simulator.instance
   sim.connect
   
-  vars = RubyFlight::Variables.instance
   aircraft = RubyFlight::Aircraft.instance
   weather = RubyFlight::Weather.instance  
   failures = RubyFlight::Failures.instance
  
-  vars.read_all
+  RubyFlight::read_all
   if (!sim.initialized?) 
     $stderr.puts "Connected, but not initialized, something strange happened"
     exit(1)
@@ -24,7 +23,7 @@ begin
   last_loop = Time.now
   
   loop do
-    vars.read_all
+    RubyFlight::read_all
     
     if (!ARGV.first.nil?) then
       puts "In #{ARGV.first}?: #{aircraft.near_airport?(ARGV.first.to_sym,2)}"

@@ -4,27 +4,23 @@ module RubyFlight
   # or all of them (:all).
   # Note that not all gears move at the same speed when lowering or raising them.
   class Gears
-    def initialize
-      @vars = RubyFlight::Variables.instance
-    end
-    
     # Set all gears down
     def down
-      @vars.set(get_gear_variable(which), 16383)
+      RubyFlight.set(get_gear_variable(which), 16383)
     end
     
     alias_method :lower, :down
     
     # Set all gears up
     def up
-      @vars.set(get_gear_variable(which), 0)
+      RubyFlight.set(get_gear_variable(which), 0)
     end
     
     alias_method :raise, :up
     
     # true if the specified gear is down
     def down?(which = :all)
-      @vars.get(get_gear_variable(which)) == 16383
+      RubyFlight.get(get_gear_variable(which)) == 16383
     end
     
     # true if the specified gear is up
