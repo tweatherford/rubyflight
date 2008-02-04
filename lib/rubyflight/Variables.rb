@@ -50,7 +50,7 @@ module RubyFlight
     end
     
     def read_all
-      offsets.each {|key,value| prepare(key)}
+      offsets.each_key {|key| prepare(key)}
       process()
     end
     
