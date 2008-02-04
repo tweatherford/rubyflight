@@ -1,7 +1,7 @@
 class RubyFlightError {
 	public:
 		RubyFlightError(unsigned long code);
-		unsigned long getCode(void);
+		unsigned long get_code(void);
 
 	private:
 		unsigned long code;
