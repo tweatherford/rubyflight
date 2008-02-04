@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <iostream>
 #include "FSUIPC_User.h"
-#include "RubyFlightError.h"
-#include "RubyFlight_PreparedVar.h"
+#include "rubyflight_error.h"
+#include "rubyflight_preparedvar.h"
 using namespace std;
 
 /**

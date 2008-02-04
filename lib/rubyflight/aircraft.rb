@@ -1,5 +1,3 @@
-require 'singleton'
-
 module RubyFlight
   class Aircraft
     include Singleton

@@ -1,5 +1,5 @@
 #include <windows.h>
-#include "RubyFlight_PreparedVar.h"
+#include "rubyflight_preparedvar.h"
 
 PreparedVar::PreparedVar(unsigned long _offset, unsigned long _size, FSType _type) :
 	offset(_offset), size(_size), type(_type)

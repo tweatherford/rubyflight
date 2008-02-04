@@ -2,7 +2,7 @@
 #define __RUBYFLIGHT_PREPARED_H__
 
 #include <map>
-#include "RubyFlight.h"
+#include "rubyflight.h"
 
 typedef unsigned char UINT8;
 typedef unsigned short UINT16;

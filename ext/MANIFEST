@@ -1,5 +1,5 @@
-RubyFlight.cpp
-RubyFlightError.cpp
-RubyFlight_PreparedVar.cpp
-RubyFlight_wrap.cpp
-IPCuser.c
+rubyflight.cpp
+rubyflight_error.cpp
+rubyflight_preparedvar.cpp
+variables.cpp
+rubyflight_wrap.cxx

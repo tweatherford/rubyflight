@@ -29,10 +29,10 @@
 %rename("code") RubyFlightError::get_code();
 
 %{
-#include "RubyFlight.h"
-#include "RubyFlightError.h"
+#include "rubyflight.h"
+#include "rubyflight_error.h"
 %}
 
-%include "RubyFlightError.h"
-%include "RubyFlight.h"
+%include "rubyflight_error.h"
+%include "rubyflight.h"
 
