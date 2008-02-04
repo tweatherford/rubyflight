@@ -1,5 +1,5 @@
-#ifndef __RUBYFLIGHT_PREPARED_H__
-#define __RUBYFLIGHT_PREPARED_H__
+#ifndef __RUBYFLIGHT_VARS_H__
+#define __RUBYFLIGHT_VARS_H__
 
 #include <map>
 #include "rubyflight.h"
@@ -9,12 +9,13 @@ typedef unsigned short UINT16;
 typedef signed char INT8;
 typedef signed short INT16;
 
-class PreparedVar {
+class Variable {
 	public:
-		PreparedVar(unsigned long offset, unsigned long size, FSType type);
-		PreparedVar(const PreparedVar& other);
-		~PreparedVar(void);
-
+		Variable(unsigned long offset, unsigned long size, FSType type);
+		Variable(const PreparedVar& other);
+		~Variable(void);
+	
+		void prepare(void);
 		void* ptr(void);
 
 		unsigned long offset;
@@ -33,9 +34,11 @@ class PreparedVar {
 		} data;
 
 	private:
-	  PreparedVar(void);
+	  Variable(void);
 };
 
-typedef std::map<unsigned long, PreparedVar>::iterator var_it;
+typedef std::map<ID, Variable>::iterator var_it;
+
+
 
 #endif

@@ -1,5 +1,2 @@
-rubyflight.cpp
-rubyflight_error.cpp
-rubyflight_preparedvar.cpp
+rubyflight_binding.cpp
 variables.cpp
-rubyflight_wrap.cxx

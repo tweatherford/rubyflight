@@ -1,24 +1,28 @@
 #include <windows.h>
-#include "rubyflight_preparedvar.h"
+#include "FSUIPC_User.h"
+#include "variables.h"
 
-PreparedVar::PreparedVar(unsigned long _offset, unsigned long _size, FSType _type) :
+Variable::Variable(unsigned long _offset, unsigned long _size, FSType _type) :
 	offset(_offset), size(_size), type(_type)
 {
 	data.uint32 = 0;
 	if (type == FS_STRING) data.str = new char[size + 1];
 }
 
-PreparedVar::PreparedVar(const PreparedVar& other) :
+Variable::Variable(const Variable& other) :
 	offset(other.offset), size(other.size), type(other.type), data(other.data)
 {
-	if (type == FS_STRING) { data.str = new char[size + 1]; memcpy(data.str, other.data.str, size); }
+	if (type == FS_STRING) {
+		data.str = new char[size + 1]; memcpy(data.str, other.data.str, size);
+		data.str[size] = '\0';
+	}
 }
 
-PreparedVar::~PreparedVar(void) {
+Variable::~Variable(void) {
 	if (type == FS_STRING) delete data.str;
 }
 
-void* PreparedVar::ptr(void) {
+void* Variable::ptr(void) {
 	switch(type) {
 		case FS_UINT:
 			switch(size) {
@@ -37,4 +41,9 @@ void* PreparedVar::ptr(void) {
 		case FS_STRING: return data.str; break;
 	}
 	throw -1;
+}
+
+void Variable::prepare(void) {
+	DWORD error_code = 0;
+	if (!FSUIPC_Read(offset, size, ptr(), &error_code)) throw RubyFlightError(error_code);
 }
