@@ -10,8 +10,9 @@ module RubyFlight
     end
     
     def get(var)
-      if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end      
-      offset,size,type = @offsets[var]
+      var_definition = @offsets[var]
+      if (var_definition.nil?) then raise RuntimeError.new("Undefined var '#{var}'") end      
+      offset,size,type = var_definition
       
       case type
       when :int; RubyFlight::get_int(offset, size)
@@ -22,8 +23,9 @@ module RubyFlight
     end
     
     def set(var, value, passed_size = 0)
-      if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
-      offset,size,type = @offsets[var]
+      var_definition = @offsets[var]
+      if (var_definition.nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
+      offset,size,type = var_definition
       
       case type
       when :int; RubyFlight::set_int(offset, size, value.to_i)
@@ -34,8 +36,9 @@ module RubyFlight
     end
     
     def prepare(var)
-      if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end      
-      offset,size,type = @offsets[var]
+      var_definition = @offsets[var]
+      if (var_definition.nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
+      offset,size,type = var_definition
 
       case type
       when :int; type = FS_INT
@@ -56,8 +59,9 @@ module RubyFlight
     end
     
     def forget(var)
-      if (@offsets[var].nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
-      offset, = @offsets[var]
+      var_definition = @offsets[var]
+      if (var_definition.nil?) then raise RuntimeError.new("Undefined var '#{var}'") end
+      offset, = var_definition
       RubyFlight::unprepare_read(offset)
     end
   end

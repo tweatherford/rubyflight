@@ -21,6 +21,8 @@ begin
   
   # failures.free_flaps
   
+  last_loop = Time.now
+  
   loop do
     vars.read_all
     
@@ -64,8 +66,10 @@ begin
     puts "Simulation rate: #{sim.simulation_rate}"
     puts "Gears Up?: all: #{aircraft.gears.up?}, right: #{aircraft.gears.up?(:right)}, left: #{aircraft.gears.up?(:left)}, nose: #{aircraft.gears.up?(:nose)}"
     puts "Brake pressure: left: #{aircraft.left_brake} right: #{aircraft.right_brake}"
+    puts " Loop Time #{Time.now - last_loop}"
     puts "----"
     sleep(0.01)
+    last_loop = Time.now
   end    
   
 ensure
