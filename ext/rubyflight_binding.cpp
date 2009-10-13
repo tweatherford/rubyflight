@@ -178,7 +178,8 @@ static VALUE set_var(VALUE self, VALUE sym, VALUE ruby_value) {
 			unsigned long string_length = RSTRING(ruby_value_str)->len;
 
 			std::string c_string(string_ptr, string_length);
-			do_write(var.offset, min(min(var.size, c_string.length()), MAX_MESSAGE_SIZE) + 1, (void*)c_string.c_str());
+			unsigned long real_length = min(var.size, (unsigned long)c_string.length());
+			do_write(var.offset, min(real_length, (unsigned long)MAX_MESSAGE_SIZE) + 1, (void*)c_string.c_str());
 		}
 		break;
 	}
