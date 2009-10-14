@@ -1,4 +1,5 @@
 require 'rubyflight'
+require 'pathname'
 
 begin
   sim = RubyFlight::Simulator.instance
@@ -7,7 +8,7 @@ begin
   aircraft = RubyFlight::Aircraft.instance
   weather = RubyFlight::Weather.instance  
   failures = RubyFlight::Failures.instance
- 
+  
   RubyFlight::read_all
   if (!sim.initialized?) 
     $stderr.puts "Connected, but not initialized, something strange happened"
@@ -65,9 +66,9 @@ begin
     puts "Simulation rate: #{sim.simulation_rate}"
     puts "Gears Up?: all: #{aircraft.gears.up?}, right: #{aircraft.gears.up?(:right)}, left: #{aircraft.gears.up?(:left)}, nose: #{aircraft.gears.up?(:nose)}"
     puts "Brake pressure: left: #{aircraft.left_brake} right: #{aircraft.right_brake}"
-    puts " Loop Time #{Time.now - last_loop}"
+    puts "Loop Time #{Time.now - last_loop}"
     puts "----"
-    sleep(0.01)
+    sleep(0)
     last_loop = Time.now
   end    
   
