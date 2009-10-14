@@ -104,7 +104,7 @@ module RubyFlight
     def load_airports(xmlfile = 'runways.xml')
       require 'rexml/document'
       puts "Loading airports database..."      
-      doc = File.open('runways.xml', 'r') {|io| Document.new(io)}
+      doc = File.open(xmlfile, 'r') {|io| Document.new(io)}
       doc.each_element('data/icao') do |icao_elem|
         airport = Airport.new
         airport.position = Position.new(icao_elem.elements['longitude'].text.to_f, icao_elem.elements['latitude'].text.to_f)
