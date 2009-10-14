@@ -31,7 +31,7 @@ static var_it lookup_var(VALUE sym) {
 /* Connect to MSFS */
 static VALUE fs_connect(VALUE self) {
 	DWORD error_code = 0;
-	if (!FSUIPC_Open(SIM_FS2K4, &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
+	if (!FSUIPC_Open(SIM_ANY, &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
 	return Qtrue;
 }
 
