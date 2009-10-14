@@ -1,13 +1,8 @@
 = TODO
 
-- Move offsets to C
+- Prepared writes
+
+= Utility code
 - A class that allows having a condition and a timer. This would be called
 periodically. When the condition is true, time is counted. When it is called
 and the time is > than the time specified, a block is called.
-- An intermediate class that handles the synchronimous/asynchronimous reading
-of variables. This would also handle offsets (like a dictionary).
-- Para poder volver a empezar despues de terminar un vuelo (sin resetear todo), se
-podria considerar que hay varios flightplans e iterar sobre estos haciendo un flight por cada vuelo en serio
-(es decir la vida de Flight deberia ser la vida del vuelo en serio)
-- Prepared writes
-- Improve RubyFlightError
