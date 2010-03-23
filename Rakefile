@@ -7,9 +7,9 @@ require 'yard'
 Echoe.new('rubyflight') do |p|
   p.author = 'v01d'
   p.summary = "Flight Simulator binding"
-  p.url = "http://github.com/v01d/ruby-gsl-ng"
+  p.url = "http://github.com/v01d/rubyflight"
   p.version = "0.1"
-  p.dependencies = ['ffi']
+  p.dependencies = ['libxml-ruby']
 end
 
 Rake::TaskManager.class_eval do
