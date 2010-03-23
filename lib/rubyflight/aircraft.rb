@@ -85,35 +85,25 @@ module RubyFlight
     
     # Returns the nearest Airport. This considers only airports withing one degree apart in both directions,
     # so it will return nil if no airport is found in such area.
-    # NOTE: the "runways.xml" file needs to be in the current directory, and it will be loaded the first
+    # NOTE: the "airports.dump" needs to be in the current directory, and it will be loaded the first
     # time it is called, unless you call #load_airports by hand first.
-    #def nearest_airport(code, radius)
-    #  if (@airports.nil?) then load_airports() end
-    #  
-    #  lat = self.latitude
-    #  long = self.longitude
-    #  pos = Position.new(lat, long)
-    #
-    #  posible_airports = @airports[lat.round][long.round]
-    #  return posible_airports.min {|a,b| a.distance_to(pos) <=> b.distance_to(pos)}
-    #end
+    def nearest_airport
+      if (@airports.nil?) then load_airports() end
+      
+      lat = self.latitude
+      long = self.longitude
+      pos = Position.new(lat, long)
     
-    # Loads the runways.xml file from the current directory unless specified
-    # This is automatically called by the apropriate methods in any case.
-    #def load_airports(xmlfile = 'runways.xml')
-    #  require 'rexml/document'
-    #  puts "Loading airports database..."      
-    #  doc = File.open(xmlfile, 'r') {|io| REXML::Document.new(io)}
-    #  doc.each_element('data/icao') do |icao_elem|
-    #    airport = Airport.new
-    #    airport.position = Position.new(icao_elem.elements['longitude'].text.to_f, icao_elem.elements['latitude'].text.to_f)
-    #    airport.city = icao_elem.elements['city'].text
-    #    airport.icao = icao_elem.attributes['id'].to_sym
-    #    airport.name = icao_elem.elements['icaoname'].text
-    #    lat,long = airport.position.lat.round,airport.position.long.round
-    #    @airports[lat][long] = @airports[lat][long] + [ airport ]
-    #  end
-    #end
+      posible_airports = @airports[lat.round][long.round]
+      return posible_airports.min {|a,b| a.distance_to(pos) <=> b.distance_to(pos)}
+    end
+    
+    # Loads the airports.dump file from the current directory (unless other path is specified).
+    # This is automatically called by the apropriate methods anyways.
+    def load_airports(dump_file = 'airports.dump')
+      puts "Loading airports database..."
+      @airports = File.open(dump_file) {|io| Marshal.load(io)}
+    end
     
     # In knots
     def indicated_airspeed

@@ -1,7 +1,12 @@
 #!/usr/bin/env ruby
+$: << '../lib'
 require 'pathname'
 require 'fileutils'
-require 'rexml/document'
+require 'xml'
+require 'rubyflight/airport'
+require 'rubyflight/position'
+
+include RubyFlight
 
 if (ARGV.first.nil?)
   puts "mkairports <Flight Simulator installation path>"
@@ -15,16 +20,21 @@ begin
   #system("makerwys.exe")
   
   puts "Loading runways.xml ..."      
-  airports = Hash.new{|h,k| h[k] = Hash.new{|h2,k2| h2[k2] = []}}
+  airports = {}
   
-  doc = File.open(Pathname.new(ARGV.first) + Pathname("runways.xml"), 'r') {|io| REXML::Document.new(io)}
-  doc.each_element('data/icao') do |icao_elem|
+  parser = XML::Parser.file(File.join(ARGV.first, 'runways.xml'))
+  puts 'Parsing...'
+  doc =  parser.parse
+  
+  doc.root.each_element do |icao_elem|
     airport = Airport.new
-    airport.position = Position.new(icao_elem.elements['longitude'].text.to_f, icao_elem.elements['latitude'].text.to_f)
-    airport.city = icao_elem.elements['city'].text
-    airport.icao = icao_elem.attributes['id'].to_sym
-    airport.name = icao_elem.elements['icaoname'].text
+    airport.position = Position.new(icao_elem.find_first('Longitude').content.to_f, icao_elem.find_first('Latitude').content.to_f)
+    airport.city = icao_elem.find_first('City').content
+    airport.icao = icao_elem['id'].to_sym
+    airport.name = icao_elem.find_first('ICAOName').content
     lat,long = airport.position.lat.round,airport.position.long.round
+    if (airports[lat].nil?) then airports[lat] = {} end
+    if (airports[lat][long].nil?) then airports[lat][long] = [] end
     airports[lat][long] = airports[lat][long] + [ airport ]
   end
   
