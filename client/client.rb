@@ -10,13 +10,7 @@ begin
   puts "Connecting to MSFS..."
   sim.connect
   RubyFlight.read_all
-  
-  if (!sim.initialized?) 
-    $stderr.puts "Connected, but not initialized, something strange happened"
-    exit(1)
-  else
-    puts "Connected, initialized ok"
-  end
+  puts "Connected"
   
   puts "Getting current flight plan"
   flightplan = RubyFlight::FlightPlan.from_xml('flightplan.xml')
@@ -39,7 +33,9 @@ begin
   end
   
 rescue RubyFlight::RubyFlightError => e
-  puts "Error! (code: #{e.code})"
+  puts "RubyFlight Error! : #{e.message)"
+rescue RuntimeError => e
+  puts "RuntimeError! : #{e.message}"
 ensure
   sim.disconnect()
   puts "Disconnected"
