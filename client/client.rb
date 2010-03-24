@@ -4,39 +4,29 @@ require 'classes/flightplan'
 require 'classes/eventlogger'
 require 'rexml/document'
 
-begin
-  sim = RubyFlight::Simulator.instance
+module RubyFlight
+  def self.connect; end
+  def self.disconnect; end
+  def self.read_all; end
+  def self.get(k); return 0 end
+  def self.set=(k,v) end
+end
+
+class Application
+  attr_accessor :stop_loop
+  attr_reader :flight
   
-  puts "Connecting to MSFS..."
-  sim.connect
-  RubyFlight.read_all
-  puts "Connected"
-  
-  puts "Getting current flight plan"
-  flightplan = RubyFlight::FlightPlan.from_xml('flightplan.xml')
-  flight = RubyFlight::Flight.new(flightplan)
-  
-  while !flight.ended? && flight.valid?
-    RubyFlight.read_all
-    flight.process
-  end
-    
-  if (!flight.valid?) then puts "Flight aborted!"
-  else 
-    puts "Flight Done. Saving."
-    File.open('flight.xml','w') do |io|
-      doc = REXML::Document.new
-      doc << REXML::XMLDecl.default
-      doc << flight.to_xml
-      doc.write(io, 2, true)
+  def run_loop
+    @stop_loop = false
+
+    puts "Connecting to MSFS..."
+    RubyFlight::Simulator.instance.connect do
+      #@flight = RubyFlight::Flight.new
+
+      while !@stop_loop
+        RubyFlight.read_all
+        #@flight.process
+      end
     end
   end
-  
-rescue RubyFlight::RubyFlightError => e
-  puts "RubyFlight Error! : #{e.message)"
-rescue RuntimeError => e
-  puts "RuntimeError! : #{e.message}"
-ensure
-  sim.disconnect()
-  puts "Disconnected"
 end

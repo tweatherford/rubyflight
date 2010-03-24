@@ -1,5 +1,3 @@
-require 'fsm'
-
 module RubyFlight
   class Flight
     MIN_TAXI_SPEED=5
@@ -10,7 +8,7 @@ module RubyFlight
     MIN_DESCENDING_ALTITUDE=800
     SLEEP_TIME=0.01
     
-    include FSM::Abbreviate
+    #include FSM::Abbreviate
     attr_reader(:fsm)
     
     def initialize(flightplan)

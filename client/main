@@ -1,0 +1,101 @@
+#!/usr/bin/ruby
+require 'fox16'
+include Fox
+
+class Window < FXMainWindow
+  def initialize(app)
+    super(app, "FS Operations", :width => 800, :height => 400)
+
+    # Status bar along the bottom
+    @statusbar = FXStatusBar.new(self, LAYOUT_SIDE_BOTTOM | LAYOUT_FILL_X | STATUSBAR_WITH_DRAGCORNER)
+    @statusbar.connect(SEL_UPDATE) { self.update_status }
+
+    # Main contents area is split left-to-right
+    splitter = FXSplitter.new(self, (LAYOUT_SIDE_TOP | LAYOUT_FILL_X | LAYOUT_FILL_Y | SPLITTER_TRACKING))
+
+    # Shutter area on the left
+    @shutter = FXShutter.new(splitter, :opts => FRAME_SUNKEN | LAYOUT_FILL_X | LAYOUT_FILL_Y,
+      :padding => 0, :hSpacing => 0, :vSpacing => 0)
+
+    shutter_item = ShutterItem.new(@shutter, "Sections", nil, LAYOUT_FILL_Y)
+    ShutterButton.new(shutter_item.content, "Flight\nStatus").connect(SEL_COMMAND) { @switcher.current = 0 }
+    ShutterButton.new(shutter_item.content, "Airport\nOperations").connect(SEL_COMMAND) { @switcher.current = 1 }
+    ShutterButton.new(shutter_item.content, "Debug").connect(SEL_COMMAND) { @switcher.current = 2 }
+
+    # Switcher on the right
+    @switcher = FXSwitcher.new(splitter, FRAME_SUNKEN | LAYOUT_FILL_X | LAYOUT_FILL_Y, :padding => 0)
+
+    # Flight status
+    frame = FXVerticalFrame.new(@switcher)
+
+    matrix = FXMatrix.new(frame, 2, MATRIX_BY_COLUMNS | LAYOUT_CENTER_X)
+    FXLabel.new(matrix, "Aircraft:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
+    @aircraft_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    FXLabel.new(matrix, "Status:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
+    @status_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    FXLabel.new(matrix, "Location:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
+    @location_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    FXLabel.new(matrix, "Condition:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
+    @condition_label = FXLabel.new(matrix, "?", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+
+    @main_button = FXButton.new(frame, 'Stop', nil, nil, 0, FRAME_RAISED | LAYOUT_CENTER_X, :padLeft => 10, :padRight => 10)
+    font = @main_button.font.fontDesc
+    font.size += 35
+    @main_button.font = FXFont.new(app, font)
+
+    @main_button.connect(SEL_COMMAND) do
+      if (app.logic_thread) then app.stop_loop = true end
+    end
+  end
+
+  def create
+    super
+    @shutter.width *= 1.6
+    show(PLACEMENT_SCREEN)
+  end
+
+  def update_status
+    t = ''
+    if (RubyFlight::Simulator.instance.connected?) then t = 'Connected'
+    else t = 'Disconnected' end
+    @statusbar.statusLine.normalText = t
+  end
+end
+
+class ShutterItem < FXShutterItem
+  def initialize(p, text, icon=nil, opts=0)
+    super(p, text, icon, opts|LAYOUT_FILL_X|LAYOUT_TOP|LAYOUT_LEFT, :padding => 10, :hSpacing => 10, :vSpacing => 10)
+    button.padTop = 2
+    button.padBottom = 2
+  end
+end
+
+class ShutterButton < FXButton
+  def initialize(p, txt, ic=nil)
+    super(p, txt, ic, :opts => BUTTON_TOOLBAR|TEXT_BELOW_ICON|FRAME_THICK|FRAME_RAISED|LAYOUT_FILL_X|LAYOUT_TOP|LAYOUT_LEFT)
+    self.backColor = p.backColor
+    self.textColor = FXRGB(255, 255, 255)
+  end
+end
+
+class Application < FXApp
+  attr_reader :logic_thread
+
+  def create
+    super
+    @logic_thread = Thread.new { run_loop }
+  end
+end
+
+require 'client'
+
+##---- run application ----##
+app = Application.new
+win = Window.new(app)
+begin
+  app.create
+  app.run
+ensure
+  app.stop_loop = true
+  app.logic_thread.join
+end

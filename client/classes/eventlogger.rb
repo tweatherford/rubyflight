@@ -1,3 +1,5 @@
+require 'singleton'
+
 module RubyFlight
   class EventLogger
     include Singleton

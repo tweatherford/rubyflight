@@ -3,6 +3,11 @@ require 'date'
 module RubyFlight
   class Simulator
     include Singleton
+
+    def initialize
+      super
+      @connected = false
+    end
     
     # show String _s_ in a box (like in adventures) for the specified _duration_ in seconds (or until the text is replaced). If _scroll_ is true, the text will scroll.
     # If _duration_ is 0, the text will remain until replaced.
@@ -18,15 +23,20 @@ module RubyFlight
       RubyFlight.set(:message, s)
       RubyFlight.set(:send_message, display_option)
     end
-    
-    # Connect to FlightSimulator
+
+    # Connect to FlightSimulator and yield the supplied block. Disconnects automatically
     def connect
       RubyFlight.connect
-    end
-    
-    # Disconnect from FlightSimulator. You should _ensure_ this.
-    def disconnect
+      @connected = true
+      yield
+    ensure
       RubyFlight.disconnect
+      @connected = false
+    end
+
+    # If succesfully connected to the simulator. This will process all prepared reads, so it may be expensive.
+    def connected?
+      @connected
     end
 
     # After connecting, this will return true when you can start get/set-ting information.
