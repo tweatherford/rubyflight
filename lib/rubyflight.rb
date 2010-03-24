@@ -1,5 +1,5 @@
 require 'singleton'
-#require 'rubyflight_binding'
+require 'rubyflight_binding'
 require 'rubyflight/aircraft'
 require 'rubyflight/fuel'
 require 'rubyflight/engines'

@@ -4,18 +4,10 @@ require 'classes/flightplan'
 require 'classes/eventlogger'
 require 'rexml/document'
 
-module RubyFlight
-  def self.connect; end
-  def self.disconnect; end
-  def self.read_all; end
-  def self.get(k); return 0 end
-  def self.set=(k,v) end
-end
-
 class Application
   attr_accessor :stop_loop
   attr_reader :flight
-  
+
   def run_loop
     @stop_loop = false
 

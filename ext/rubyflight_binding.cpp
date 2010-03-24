@@ -174,8 +174,8 @@ static VALUE set_var(VALUE self, VALUE sym, VALUE ruby_value) {
 		case FS_STRING:
 		{
 			VALUE ruby_value_str = StringValue(ruby_value);
-			const char* string_ptr = RSTRING(ruby_value_str)->ptr;
-			unsigned long string_length = RSTRING(ruby_value_str)->len;
+			const char* string_ptr = RSTRING_PTR(ruby_value_str);
+			unsigned long string_length = RSTRING_LEN(ruby_value_str);
 
 			std::string c_string(string_ptr, string_length);
 			unsigned long real_length = min(var.size, (unsigned long)c_string.length());
