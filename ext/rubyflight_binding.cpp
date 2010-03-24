@@ -237,6 +237,9 @@ extern "C" void Init_rubyflight_binding(void) {
   define_var("nose_gear_control", 0xBEC, 4, FS_UINT); define_var("right_gear_control", 0xBF4, 4, FS_UINT); define_var("left_gear_control", 0xBF0, 4, FS_UINT);
   define_var("left_brake", 0xBC4, 2, FS_UINT); define_var("right_brake", 0xBC6, 2, FS_UINT);
   define_var("left_brake_pressure", 0xC00, 1, FS_UINT); define_var("right_brake_pressure", 0xC01, 1, FS_UINT);
+  define_var("aircraft_type", 0x3160, 24, FS_STRING);
+  define_var("aircraft_model", 0x3500, 24, FS_STRING);
+  define_var("aircraft_name", 0x3D00, 256, FS_STRING);
 
   define_var("engines_number", 0xAEC, 2, FS_INT);
 

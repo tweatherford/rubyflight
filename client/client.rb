@@ -19,7 +19,6 @@ class Application
   def run_loop
     @stop_loop = false
 
-    puts "Connecting to MSFS..."
     RubyFlight::Simulator.instance.connect do
       #@flight = RubyFlight::Flight.new
 

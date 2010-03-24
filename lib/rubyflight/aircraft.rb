@@ -206,5 +206,9 @@ module RubyFlight
     def brake(set_value = 1.0)
       both_brakes(set_value)
     end
+
+    def name; RubyFlight.get(:aircraft_name) end
+    def type; RubyFlight.get(:aircraft_type) end
+    def model; RubyFlight.get(:aircraft_model) end
   end
 end

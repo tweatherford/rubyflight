@@ -30,7 +30,12 @@ class Window < FXMainWindow
 
     matrix = FXMatrix.new(frame, 2, MATRIX_BY_COLUMNS | LAYOUT_CENTER_X)
     FXLabel.new(matrix, "Aircraft:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
-    @aircraft_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    aircraft_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    aircraft_label.connect(SEL_UPDATE) {
+      if (RubyFlight::Simulator.instance.connected?) then aircraft_label.text = RubyFlight::Aircraft.instance.name
+      else aircraft_label.text = '' end
+    }
+
     FXLabel.new(matrix, "Status:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
     @status_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
     FXLabel.new(matrix, "Location:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
@@ -44,7 +49,13 @@ class Window < FXMainWindow
     @main_button.font = FXFont.new(app, font)
 
     @main_button.connect(SEL_COMMAND) do
-      if (app.logic_thread) then app.stop_loop = true end
+      if (RubyFlight::Simulator.instance.connected?) then app.stop_loop = true
+      else app.start_thread end
+    end
+
+    @main_button.connect(SEL_UPDATE) do
+      if (RubyFlight::Simulator.instance.connected?) then @main_button.text = 'Stop'
+      else @main_button.text = 'Start' end
     end
   end
 
@@ -83,7 +94,13 @@ class Application < FXApp
 
   def create
     super
-    @logic_thread = Thread.new { run_loop }
+    @logic_thread = nil
+    self.start_thread
+  end
+
+  def start_thread
+    @logic_thread.join unless @logic_thread.nil?
+    @logic_thread = Thread.new { self.run_loop }
   end
 end
 
