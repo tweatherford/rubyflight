@@ -1,5 +1,6 @@
 #include <windows.h>
 #include "FSUIPC_User.h"
+#include "common.h"
 #include "variables.h"
 
 Variable::Variable(unsigned long _offset, unsigned long _size, FSType _type) :
@@ -45,5 +46,5 @@ void* Variable::ptr(void) {
 
 void Variable::prepare(void) {
 	DWORD error_code = 0;
-	if (!FSUIPC_Read(offset, size, ptr(), &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
+	if (!FSUIPC_Read(offset, size, ptr(), &error_code)) raise_fsuipc_error(error_code);
 }

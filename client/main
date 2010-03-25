@@ -5,10 +5,10 @@ include Fox
 class Window < FXMainWindow
   def initialize(app)
     super(app, "FS Operations", :width => 800, :height => 400)
+    app.main_window = self
 
     # Status bar along the bottom
     @statusbar = FXStatusBar.new(self, LAYOUT_SIDE_BOTTOM | LAYOUT_FILL_X | STATUSBAR_WITH_DRAGCORNER)
-    @statusbar.connect(SEL_UPDATE) { self.update_status }
 
     # Main contents area is split left-to-right
     splitter = FXSplitter.new(self, (LAYOUT_SIDE_TOP | LAYOUT_FILL_X | LAYOUT_FILL_Y | SPLITTER_TRACKING))
@@ -20,12 +20,13 @@ class Window < FXMainWindow
     shutter_item = ShutterItem.new(@shutter, "Sections", nil, LAYOUT_FILL_Y)
     ShutterButton.new(shutter_item.content, "Flight\nStatus").connect(SEL_COMMAND) { @switcher.current = 0 }
     ShutterButton.new(shutter_item.content, "Airport\nOperations").connect(SEL_COMMAND) { @switcher.current = 1 }
-    ShutterButton.new(shutter_item.content, "Debug").connect(SEL_COMMAND) { @switcher.current = 2 }
+    #ShutterButton.new(shutter_item.content, "Aircrafts").connect(SEL_COMMAND) { @switcher.current = 2 }
+    #ShutterButton.new(shutter_item.content, "Debug").connect(SEL_COMMAND) { @switcher.current = 3 }
 
     # Switcher on the right
     @switcher = FXSwitcher.new(splitter, FRAME_SUNKEN | LAYOUT_FILL_X | LAYOUT_FILL_Y, :padding => 0)
 
-    # Flight status
+    #------------ Flight status -------------#
     frame = FXVerticalFrame.new(@switcher)
 
     matrix = FXMatrix.new(frame, 2, MATRIX_BY_COLUMNS | LAYOUT_CENTER_X)
@@ -39,24 +40,43 @@ class Window < FXMainWindow
     FXLabel.new(matrix, "Status:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
     @status_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
     FXLabel.new(matrix, "Location:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
-    @location_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    location_label = FXLabel.new(matrix, "", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
+    location_label.connect(SEL_UPDATE) {
+      if (RubyFlight::Simulator.instance.connected?)
+        location_label.text = RubyFlight::Aircraft.instance.nearest_airport.to_s
+      else location_label.text = '' end
+    }
+
     FXLabel.new(matrix, "Condition:", nil, LAYOUT_SIDE_RIGHT | LAYOUT_FILL_X)
     @condition_label = FXLabel.new(matrix, "?", nil, LAYOUT_SIDE_LEFT | LAYOUT_FILL_X)
 
-    @main_button = FXButton.new(frame, 'Stop', nil, nil, 0, FRAME_RAISED | LAYOUT_CENTER_X, :padLeft => 10, :padRight => 10)
+    @main_button = FXButton.new(frame, 'Start Flight', nil, nil, 0, FRAME_RAISED | LAYOUT_CENTER_X, :padLeft => 10, :padRight => 10)
     font = @main_button.font.fontDesc
     font.size += 35
     @main_button.font = FXFont.new(app, font)
 
-    @main_button.connect(SEL_COMMAND) do
-      if (RubyFlight::Simulator.instance.connected?) then app.stop_loop = true
-      else app.start_thread end
-    end
+    #--------- Airport Operations ----------#
+    frame = FXVerticalFrame.new(@switcher)
 
-    @main_button.connect(SEL_UPDATE) do
-      if (RubyFlight::Simulator.instance.connected?) then @main_button.text = 'Stop'
-      else @main_button.text = 'Start' end
-    end
+    FXLabel.new(frame, "Available at airport")
+    table = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
+    table.appendColumns(3)
+    table.setColumnText(0, "Cargo Name")
+    table.setColumnText(1, "Weight")
+    table.setColumnText(2, "Destination")
+    table.rowHeaderMode = LAYOUT_FIX_WIDTH
+    table.rowHeaderWidth = 0
+
+    FXButton.new(frame, 'Transfer', nil, nil, 0, BUTTON_NORMAL | LAYOUT_CENTER_X)
+
+    FXLabel.new(frame, "Available on aircraft")
+    table = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
+    table.appendColumns(3)
+    table.setColumnText(0, "Cargo Name")
+    table.setColumnText(1, "Weight")
+    table.setColumnText(2, "Destination")
+    table.rowHeaderMode = LAYOUT_FIX_WIDTH
+    table.rowHeaderWidth = 0
   end
 
   def create
@@ -65,11 +85,8 @@ class Window < FXMainWindow
     show(PLACEMENT_SCREEN)
   end
 
-  def update_status
-    t = ''
-    if (RubyFlight::Simulator.instance.connected?) then t = 'Connected'
-    else t = 'Disconnected' end
-    @statusbar.statusLine.normalText = t
+  def status=(text)
+    @statusbar.statusLine.normalText = text
   end
 end
 
@@ -89,30 +106,67 @@ class ShutterButton < FXButton
   end
 end
 
+$: << '../lib'
+require 'rubyflight'
+require 'classes/flight'
+require 'classes/flightplan'
+require 'classes/eventlogger'
+require 'rexml/document'
+
 class Application < FXApp
-  attr_reader :logic_thread
+  attr_accessor :main_window
+
+  def status=(text)
+    self.main_window.status = text
+  end
+
+  def error=(text)
+    dialog = FXDialogBox.new(self.main_window, "Error!")
+    FXLabel.new(dialog, text)
+    FXButton.new(dialog, "Ok")
+    dialog.execute
+  end
 
   def create
     super
-    @logic_thread = nil
-    self.start_thread
+    @stop_loop = false
+    self.main_window.connect(SEL_CLOSE) {
+      result = FXMessageBox.question(self.main_window, MBOX_YES_NO, "Exit program", "Are you sure?")
+      if (result == MBOX_CLICKED_YES) then @stop_loop = true; self.main_window = nil; 0
+      else 1 end
+    }
   end
 
-  def start_thread
-    @logic_thread.join unless @logic_thread.nil?
-    @logic_thread = Thread.new { self.run_loop }
+  def run_loop
+    RubyFlight::Aircraft.instance.load_airports
+
+    self.status = 'Connecting...'
+    begin
+      self.runWhileEvents
+      RubyFlight::Simulator.instance.connect do
+        self.status = 'Connected'
+        #@flight = RubyFlight::Flight.new
+
+        while !@stop_loop
+          RubyFlight.read_all
+          #@flight.process
+          self.runWhileEvents
+        end
+      end
+    rescue RubyFlight::RubyFlightError => e
+      unless (self.main_window.nil?)
+        self.status = "Disconnected! (Error: #{e.message}, code: #{e.code}). Attempting reconnection..."
+        #self.error = "Disconnected! (Error: #{e.message}, code: #{e.code})"
+        retry
+      else
+        raise
+      end
+    end
   end
 end
-
-require 'client'
 
 ##---- run application ----##
 app = Application.new
 win = Window.new(app)
-begin
-  app.create
-  app.run
-ensure
-  app.stop_loop = true
-  app.logic_thread.join
-end
+app.create
+app.run_loop

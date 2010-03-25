@@ -16,11 +16,19 @@ using namespace std;
 map<unsigned long, Variable> variables;
 const unsigned int MAX_MESSAGE_SIZE = 127;
 
+VALUE rb_eRubyFlightError = Qnil;
+
+void raise_fsuipc_error(DWORD error_code) {
+  VALUE args[] = { ULONG2NUM(error_code) };
+  VALUE inst = rb_class_new_instance(1, args, rb_eRubyFlightError);
+  rb_exc_raise(inst);
+}
+
 static var_it lookup_var(VALUE sym) {
 	if (!SYMBOL_P(sym)) rb_raise(rb_eTypeError, "Expected a Symbol");
 	ID symbol_id = SYM2ID(sym);
 	var_it it = variables.find(symbol_id);
-	if (it == variables.end()) rb_raise(rb_eRuntimeError, "FSUIPC Variable '%s' unknown", rb_id2name(symbol_id));
+	if (it == variables.end()) rb_raise(rb_eRubyFlightError, "FSUIPC Variable '%s' unknown", rb_id2name(symbol_id));
 	return it;
 }
 
@@ -31,7 +39,7 @@ static var_it lookup_var(VALUE sym) {
 /* Connect to MSFS */
 static VALUE fs_connect(VALUE self) {
 	DWORD error_code = 0;
-	if (!FSUIPC_Open(SIM_ANY, &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
+	if (!FSUIPC_Open(SIM_ANY, &error_code)) raise_fsuipc_error(error_code);
 	return Qtrue;
 }
 
@@ -63,7 +71,7 @@ static VALUE prepare_all_reads(VALUE self) {
 /* Execute the prepared reads. After this call, all values are available for get()ing */
 static VALUE process(VALUE self) {
 	DWORD error_code = 0;
-	if (!FSUIPC_Process(&error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
+	if (!FSUIPC_Process(&error_code)) raise_fsuipc_error(error_code);
 	return Qtrue;
 }
 
@@ -93,7 +101,7 @@ static VALUE get_var(VALUE self, VALUE sym) {
 				case 1: result = var.data.int8; break;
 				case 2: result = var.data.int16; break;
 				case 4: result = var.data.int32; break;
-				default: rb_raise(rb_eRuntimeError, "Invalid 'int' FSUIPC variable size of %i", var.size); break;
+				default: rb_raise(rb_eRuntimeError, "Invalid 'int' FSUIPC variable size of %lu", var.size); break;
 			}
 
 			return LONG2NUM(result);
@@ -107,7 +115,7 @@ static VALUE get_var(VALUE self, VALUE sym) {
 				case 1: result = var.data.uint8; break;
 				case 2: result = var.data.uint16; break;
 				case 4: result = var.data.uint32; break;
-				default: rb_raise(rb_eRuntimeError, "Invalid 'uint' FSUIPC variable size of %i", var.size); break;
+				default: rb_raise(rb_eRuntimeError, "Invalid 'uint' FSUIPC variable size of %lu", var.size); break;
 			}
 
 			return ULONG2NUM(result);
@@ -133,7 +141,7 @@ static VALUE get_var(VALUE self, VALUE sym) {
  */
  static void do_write(unsigned long offset, unsigned long size, void* data) {
  	DWORD error_code = 0;
- 	if (!FSUIPC_Write(offset, size, data, &error_code)) rb_raise(rb_eRuntimeError, "FSUIPC returned error code %i", error_code);
+ 	if (!FSUIPC_Write(offset, size, data, &error_code)) raise_fsuipc_error(error_code);
  	process(Qnil);
 
 }
@@ -150,7 +158,7 @@ static VALUE set_var(VALUE self, VALUE sym, VALUE ruby_value) {
 				case 1: { INT8	data = static_cast<INT8>(value); do_write(var.offset, var.size, &data); } break;
 				case 2: { INT16 data = static_cast<INT16>(value); do_write(var.offset, var.size, &data); } break;
 				case 4: { INT32 data = static_cast<INT32>(value); do_write(var.offset, var.size, &data); } break;
-				default: rb_raise(rb_eRuntimeError, "Invalid 'int' FSUIPC variable size of %i", var.size); break;
+				default: rb_raise(rb_eRuntimeError, "Invalid 'int' FSUIPC variable size of %lu", var.size); break;
 			}
 		}
 		break;
@@ -161,7 +169,7 @@ static VALUE set_var(VALUE self, VALUE sym, VALUE ruby_value) {
 				case 1: { UINT8	data = static_cast<UINT8>(value); do_write(var.offset, var.size, &data); } break;
 				case 2: { UINT16 data = static_cast<UINT16>(value); do_write(var.offset, var.size, &data); } break;
 				case 4: { UINT32 data = static_cast<UINT32>(value); do_write(var.offset, var.size, &data); } break;
-				default: rb_raise(rb_eRuntimeError, "Invalid 'uint' FSUIPC variable size of %i", var.size); break;
+				default: rb_raise(rb_eRuntimeError, "Invalid 'uint' FSUIPC variable size of %lu", var.size); break;
 			}
 		}
 		break;
@@ -197,6 +205,7 @@ void define_var(const char* var_name, unsigned long offset, unsigned long size, 
  */
 extern "C" void Init_rubyflight_binding(void) {
   VALUE mRubyFlight = rb_define_module("RubyFlight");
+  rb_eRubyFlightError = rb_define_class_under(mRubyFlight, "RubyFlightError", rb_eRuntimeError);
 
   rb_define_module_function(mRubyFlight, "connect", RUBY_METHOD_FUNC(fs_connect), 0);
   rb_define_module_function(mRubyFlight, "disconnect", RUBY_METHOD_FUNC(fs_disconnect), 0);

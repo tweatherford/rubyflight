@@ -9,7 +9,7 @@ Echoe.new('rubyflight') do |p|
   p.summary = "Flight Simulator binding"
   p.url = "http://github.com/v01d/rubyflight"
   p.version = "0.1"
-  p.dependencies = ['libxml-ruby']
+  p.dependencies = ['nokogiri']
 end
 
 Rake::TaskManager.class_eval do

@@ -4,3 +4,7 @@ doc
 .yardoc
 utils/runways.xml
 utils/airports.dump
+ext/*.o
+ext/Makefile
+ext/*.so
+lib/*.so

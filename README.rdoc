@@ -16,21 +16,10 @@ RubyFlight. You can use this as an example. To run this, just do
   ruby test.rb  
 with FS open, and you'll get a periodical reading of various FS variables.
 
-= Compilation Requirements
-Since this is a Windows-only extension (it wouldn't make sense otherwise), you
-need:
-* Ruby One-Click Installer, MinGW32 version
+= Requirements
+You'll need to install:
+* Ruby One-Click Installer (version 1.9 or above is desired)
 * Ruby Installer's DevKit (see rubyinstaller.org for that)
-* FSUIPC SDK
- 
-Place IPCuser.c, IPCuser.h and FSUIPC_User.h under the ext folder.
-
-= Source Installation
-
-Finally, you can bring up a console (Start->Execute-> "cmd"), change into your
-rubyflight folder and run:
-  ruby setup.rb
-Which will configure (i.e.: create the ruby extension), setup and install.
 
 = License
 

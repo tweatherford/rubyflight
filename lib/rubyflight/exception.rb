@@ -1,6 +1,13 @@
 module RubyFlight
-  class RubyFlightError
-    def to_str
+  class RubyFlightError < RuntimeError
+    attr_reader :code
+    
+    def initialize(code)
+      @code = code
+      super(self.translate_code)
+    end
+
+    def translate_code
       case self.code
       when 0; "No error"
       when 1; "Cannot link to FSUIPC/WideClient"

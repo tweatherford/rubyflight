@@ -83,7 +83,7 @@ module RubyFlight
     end
     alias_method :pushback?, :pushing_back?
     
-    # Returns the nearest Airport. This considers only airports withing one degree apart in both directions,
+    # Returns the nearest Airport. This considers only airports within one degree apart in both directions,
     # so it will return nil if no airport is found in such area.
     # NOTE: the "airports.dump" needs to be in the current directory, and it will be loaded the first
     # time it is called, unless you call #load_airports by hand first.
@@ -93,14 +93,25 @@ module RubyFlight
       lat = self.latitude
       long = self.longitude
       pos = Position.new(lat, long)
-    
-      posible_airports = @airports[lat.round][long.round]
-      return posible_airports.min {|a,b| a.distance_to(pos) <=> b.distance_to(pos)}
+
+      for lat_offset in [ 0, -1, +1 ]
+        lat_airports = @airports[lat.round + lat_offset]
+        if (lat_airports.nil?) then next
+        else
+          for long_offset in [ 0, -1, +1]
+            possible_airports = lat_airports[long.round + long_offset]
+            if (possible_airports.nil? || possible_airports.empty?) then next
+            else return possible_airports.min {|a,b| a.position.distance_to(pos) <=> b.position.distance_to(pos)} end
+          end
+        end        
+      end
+
+      return nil
     end
     
-    # Loads the airports.dump file from the current directory (unless other path is specified).
+    # Loads the airports.dump file from the home directory (unless other path is specified).
     # This is automatically called by the apropriate methods anyways.
-    def load_airports(dump_file = 'airports.dump')
+    def load_airports(dump_file = File.join(ENV['HOME'],'rubyflight','airports.dump'))
       puts "Loading airports database..."
       @airports = File.open(dump_file) {|io| Marshal.load(io)}
     end
