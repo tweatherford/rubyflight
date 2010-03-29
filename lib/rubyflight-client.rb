@@ -1,0 +1,6 @@
+require 'rubyflight-client/flight'
+require 'rubyflight-client/flightplan'
+require 'rubyflight-client/eventlogger'
+require 'rubyflight-client/cargo'
+require 'rubyflight-client/airport'
+require 'rubyflight-client/main_loop'
