@@ -3,8 +3,7 @@ $: << '../lib'
 require 'pathname'
 require 'fileutils'
 require 'nokogiri'
-require 'rubyflight/airport'
-require 'rubyflight/position'
+require 'rubyflight'
 
 include RubyFlight
 include Nokogiri
@@ -16,7 +15,6 @@ if (ARGV.first == '-h' || ARGV.first == '--help')
 end
 
 begin
-  current_dir = Dir.getwd
   fspath = nil
   if (ARGV.first) then fspath = ARGV.first
   else
@@ -29,13 +27,14 @@ begin
   Dir.chdir(fspath)
 
   puts "Executing makerwys.exe ..."
-  system(File.join(current_dir, 'makerwys.exe'))
+  #system(File.join(current_dir, 'makerwys.exe'))
   
-  puts "Loading runways.xml ..."      
-  airports = {}
-  
+  puts "Loading runways.xml ..."  
   doc = File.open('runways.xml') {|io| XML.parse(io)}
-  
+
+  airports_by_location = {}
+  airports_by_code = {}
+
   doc.root.children.each do |icao_elem|
     unless (icao_elem.text?)
       airport = Airport.new
@@ -43,18 +42,22 @@ begin
       airport.city = icao_elem.at_xpath('City').content
       airport.icao = icao_elem['id'].to_sym
       airport.name = icao_elem.at_xpath('ICAOName').content
+
+      airports_by_code[airport.icao] = airport
+
       lat,long = airport.position.lat.round,airport.position.long.round
-      if (airports[lat].nil?) then airports[lat] = {} end
-      if (airports[lat][long].nil?) then airports[lat][long] = [] end
-      airports[lat][long] = airports[lat][long] + [ airport ]
+      if (airports_by_location[lat].nil?) then airports_by_location[lat] = {} end
+      if (airports_by_location[lat][long].nil?) then airports_by_location[lat][long] = [] end
+      airports_by_location[lat][long] = airports_by_location[lat][long] + [ airport ]
     end
   end
 
   dump_dir = File.join(ENV['HOME'],'rubyflight')
-  Dir.mkdir(dump_dir)
+  FileUtils.mkdir_p(dump_dir)
   dump_path = File.join(dump_dir,'airports.dump')
+
   puts "Saving to #{dump_path} ..."
-  File.open(dump_path,'w') {|io| Marshal.dump(airports,io)}
+  File.open(dump_path,'w') {|io| Marshal.dump({ :by_location => airports_by_location, :by_code => airports_by_code}, io)}
   
 rescue RuntimeError => e
   puts "Error!: #{e.message}"

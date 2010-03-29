@@ -267,6 +267,8 @@ extern "C" void Init_rubyflight_binding(void) {
   define_var("message", 0x3380, 127, FS_STRING); define_var("send_message", 0x32FA, 2, FS_INT);
   define_var("initialized", 0x4D6, 2, FS_UINT); define_var("simulation_rate", 0xC1A, 2, FS_UINT);
 
+  define_var("readytofly", 0x3364, 1, FS_UINT); define_var("inmenuordialog", 0x3365, 1, FS_UINT);
+
   define_var("time_local_hour", 0x238, 1, FS_UINT); define_var("time_local_minute", 0x239, 1, FS_UINT); define_var("time_second", 0x23A, 1, FS_UINT);
   define_var("time_gmt_hour", 0x23B, 1, FS_UINT); define_var("time_gmt_minute", 0x23C, 1, FS_UINT);
   define_var("time_day", 0x23E, 2, FS_UINT); define_var("time_year", 0x240, 2, FS_UINT);

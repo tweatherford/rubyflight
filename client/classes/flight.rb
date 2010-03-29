@@ -1,3 +1,5 @@
+require 'pretty-fsm'
+
 module RubyFlight
   class Flight
     MIN_TAXI_SPEED=5
@@ -8,16 +10,26 @@ module RubyFlight
     MIN_DESCENDING_ALTITUDE=800
     SLEEP_TIME=0.01
     
-    #include FSM::Abbreviate
+    include PrettyFSM::Abbreviate
     attr_reader(:fsm)
     
-    def initialize(flightplan)
-      @flightplan = flightplan
-      @plane = RubyFlight::Aircraft.instance()
+    def initialize
+      @flightplan = nil
+      @plane = RubyFlight::Aircraft.instance
       @invalidated = false
       @touchdown_speed = nil
       
-      @fsm = FSM::FSM.new(self, :not_started)
+      @fsm = PrettyFSM::FSM.new(self, :not_started) do
+        transition :from => :not_started,           :to => :preparing,            :if => :can_start?
+        transition :from => :preparing,             :to => :taxing_for_departure, :if => :seems_taxing?
+        transition :from => :taxing_for_departure,  :to => :taking_off,           :if => :seems_taking_off?
+        transition :from => :taking_off,            :to => :ascending,            :if => :seems_ascending?
+        transition :from => :ascending,             :to => :cruising,             :if => :seems_cruising?
+        transition :from => :cruising,              :to => :descending,           :if => :seems_descending?
+        transition :from => :descending,            :to => :landing,              :if => :seems_landing?
+        transition :from => :landing,               :to => :taxing_for_parking,   :if => :seems_taxing?
+        transition :from => :taxing_for_parking,    :to => :finished,             :if => :seems_finished?
+      end
     end
     
     def status
@@ -31,7 +43,6 @@ module RubyFlight
     # must be called periodically to process the flight state
     def process
       @fsm.advance
-      sleep(SLEEP_TIME)
     end
     
     def valid?
@@ -54,13 +65,12 @@ module RubyFlight
     def can_start?
       @plane.on_ground? && @plane.parking_brake? &&
              (@plane.engines.all? {|n| @plane.fuel.valve_closed?(n)} ||
-              @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)})
-      #        && @plane.near_airport?(@flightplan.from, 2)
+              @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)} &&
+              @plane.near_airport?(@flightplan.from))
     end
     
     def while_not_started
       puts "Flight not prepared, waiting"
-      if (can_start?) then start(:preparing) end
     end
             
     def start_preparing
@@ -70,8 +80,7 @@ module RubyFlight
     end
     
     def while_preparing
-      puts "while started"      
-      if (seems_taxing?) then start(:taxing_for_departure) end
+      puts "while started"
     end    
 
     ## Taxing
@@ -86,7 +95,6 @@ module RubyFlight
     
     def while_taxing_for_departure
       puts "taxiing for departure"
-      if (seems_taking_off?) then start(:taking_off) end
     end
     
     ## Takeoff
@@ -100,7 +108,6 @@ module RubyFlight
     
     def while_taking_off
       puts "taking off"
-      if (seems_ascending?) then start(:ascending) end
     end
     
     # Ascent
@@ -114,7 +121,6 @@ module RubyFlight
     
     def while_ascending
       puts "while ascending"
-      if (seems_cruising?) then start(:cruising) end
     end
     
     # Cruise
@@ -128,7 +134,6 @@ module RubyFlight
     
     def while_cruising
       puts "while cruising"
-      if (seems_descending?) then start(:descending) end
     end
     
     # Descent
@@ -142,7 +147,6 @@ module RubyFlight
     
     def while_descending
       puts "start descending"
-      if (seems_landing?) then start(:landing) end
     end
     
     # Landing
@@ -157,7 +161,6 @@ module RubyFlight
     def while_landing
       puts "while landing"
       check_touchdown_speed
-      if (seems_taxing?) then start(:taxing_for_parking) end
     end
     
     def check_touchdown_speed
@@ -177,11 +180,10 @@ module RubyFlight
 
     def while_taxing_for_parking
       puts "taxiing for parking"
-      if (seems_ended?) then start(:finished) end
     end
     
     # End
-    def seems_ended?
+    def seems_finished?
       @plane.parking_brake? &&
       (@plane.engines.all? {|n| @plane.fuel.valve_closed?(n)} ||
       @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)})
@@ -191,7 +193,7 @@ module RubyFlight
       puts "finished"
       EventLogger.instance().log(:flight_end, {
         'final_fuel' => @plane.fuel.level,
-        'correct_airport' => true,#@plane.near_airport?(@flightplan.to, 2) TODO: fix this
+        'correct_airport' => @plane.near_airport?(@flightplan.to)
       })
     end
     

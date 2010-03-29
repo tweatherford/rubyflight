@@ -59,24 +59,38 @@ class Window < FXMainWindow
     frame = FXVerticalFrame.new(@switcher)
 
     FXLabel.new(frame, "Available at airport")
-    table = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
-    table.appendColumns(3)
-    table.setColumnText(0, "Cargo Name")
-    table.setColumnText(1, "Weight")
-    table.setColumnText(2, "Destination")
-    table.rowHeaderMode = LAYOUT_FIX_WIDTH
-    table.rowHeaderWidth = 0
+    table1 = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
+    table1.appendColumns(3)
+    table1.setColumnText(0, "Cargo Name")
+    table1.setColumnText(1, "Weight")
+    table1.setColumnText(2, "Destination")
+    table1.rowHeaderMode = LAYOUT_FIX_WIDTH
+    table1.rowHeaderWidth = 0
+    table1.connect(SEL_UPDATE) {
+      # TODO: if correct status
+      table1.removeRows(0, table1.numRows)
+      airport = RubyFlight::Aircraft.instance.nearest_airport
+      unless airport.nil?
+        c = airport.available_cargo
+        table1.appendRows(c.size)
+        table1.numRows.times do |i|
+          table1.setItemText(i, 0, c[i].name)
+          table1.setItemText(i, 1, c[i].weight.to_s)
+          table1.setItemText(i, 2, c[i].destination.to_s)
+        end
+      end
+    }
 
     FXButton.new(frame, 'Transfer', nil, nil, 0, BUTTON_NORMAL | LAYOUT_CENTER_X)
 
     FXLabel.new(frame, "Available on aircraft")
-    table = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
-    table.appendColumns(3)
-    table.setColumnText(0, "Cargo Name")
-    table.setColumnText(1, "Weight")
-    table.setColumnText(2, "Destination")
-    table.rowHeaderMode = LAYOUT_FIX_WIDTH
-    table.rowHeaderWidth = 0
+    table2 = FXTable.new(frame, nil, 0, TABLE_NO_COLSELECT | TABLE_READONLY | LAYOUT_FILL_X | LAYOUT_FILL_Y)
+    table2.appendColumns(3)
+    table2.setColumnText(0, "Cargo Name")
+    table2.setColumnText(1, "Weight")
+    table2.setColumnText(2, "Destination")
+    table2.rowHeaderMode = LAYOUT_FIX_WIDTH
+    table2.rowHeaderWidth = 0
   end
 
   def create
@@ -111,6 +125,8 @@ require 'rubyflight'
 require 'classes/flight'
 require 'classes/flightplan'
 require 'classes/eventlogger'
+require 'classes/cargo'
+require 'classes/airport'
 require 'rexml/document'
 
 class Application < FXApp
@@ -138,18 +154,18 @@ class Application < FXApp
   end
 
   def run_loop
-    RubyFlight::Aircraft.instance.load_airports
+    RubyFlight::Airport.load_database
 
     self.status = 'Connecting...'
     begin
       self.runWhileEvents
       RubyFlight::Simulator.instance.connect do
         self.status = 'Connected'
-        #@flight = RubyFlight::Flight.new
+        @flight = RubyFlight::Flight.new
 
         while !@stop_loop
           RubyFlight.read_all
-          #@flight.process
+          @flight.process
           self.runWhileEvents
         end
       end

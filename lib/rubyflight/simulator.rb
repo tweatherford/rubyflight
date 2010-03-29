@@ -43,6 +43,16 @@ module RubyFlight
     def initialized?
       return RubyFlight.get(:initialized) == 0xFADE
     end
+
+    # If false, FS may be loading/reloading aircraft/scenery/flight. Pausing doesn't make this false.
+    def ready_to_fly?
+      return RubyFlight.get(:readytofly) == 0
+    end
+
+    # True when FS is paused because user opened a menu or is accessing a modal dialog
+    def in_menu_or_dialog?
+      return RubyFlight.get(:inmenuordialog) != 0
+    end
     
     # Return a Time object containing the current Simulator utc time
     def utctime

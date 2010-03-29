@@ -86,16 +86,16 @@ module RubyFlight
     # Returns the nearest Airport. This considers only airports within one degree apart in both directions,
     # so it will return nil if no airport is found in such area.
     # NOTE: the "airports.dump" needs to be in the current directory, and it will be loaded the first
-    # time it is called, unless you call #load_airports by hand first.
+    # time it is called, unless you call Airport.load_database by hand first.
     def nearest_airport
-      if (@airports.nil?) then load_airports() end
-      
       lat = self.latitude
       long = self.longitude
       pos = Position.new(lat, long)
 
+      airports = Airport.database[:by_location]
+
       for lat_offset in [ 0, -1, +1 ]
-        lat_airports = @airports[lat.round + lat_offset]
+        lat_airports = airports[lat.round + lat_offset]
         if (lat_airports.nil?) then next
         else
           for long_offset in [ 0, -1, +1]
@@ -109,11 +109,14 @@ module RubyFlight
       return nil
     end
     
-    # Loads the airports.dump file from the home directory (unless other path is specified).
-    # This is automatically called by the apropriate methods anyways.
-    def load_airports(dump_file = File.join(ENV['HOME'],'rubyflight','airports.dump'))
-      puts "Loading airports database..."
-      @airports = File.open(dump_file) {|io| Marshal.load(io)}
+    def position
+      Position.new(self.latitude, self.longitude)
+    end
+
+    # If aircraft is at most at +max_distance+ miles from airport
+    def near_airport?(icao, max_distance = 5)
+      airports = Airport.database[:by_code]
+      return (airports[icao.to_sym].position.distance_to(self.position) <= max_distance)
     end
     
     # In knots
