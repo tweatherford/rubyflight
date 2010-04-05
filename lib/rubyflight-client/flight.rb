@@ -16,42 +16,29 @@ module RubyFlight
     def initialize
       @flightplan = nil
       @plane = RubyFlight::Aircraft.instance
+      @sim = RubyFlight::Simulator.instance
       @invalidated = false
       @touchdown_speed = nil
       
-      @fsm = PrettyFSM::FSM.new(self, :not_started) do
-        transition :from => :not_started,           :to => :preparing,            :if => :can_start?
-        transition :from => :preparing,             :to => :taxing_for_departure, :if => :seems_taxing?
+      @fsm = PrettyFSM::FSM.new(self, :invalid) do
+        transition :from => :invalid,               :to => :parked_for_departure, :if => :seems_parked?
+        transition :from => :parked_for_departure,  :to => :taxing_for_departure, :if => :seems_taxing?
         transition :from => :taxing_for_departure,  :to => :taking_off,           :if => :seems_taking_off?
         transition :from => :taking_off,            :to => :ascending,            :if => :seems_ascending?
         transition :from => :ascending,             :to => :cruising,             :if => :seems_cruising?
         transition :from => :cruising,              :to => :descending,           :if => :seems_descending?
         transition :from => :descending,            :to => :landing,              :if => :seems_landing?
-        transition :from => :landing,               :to => :taxing_for_parking,   :if => :seems_taxing?
-        transition :from => :taxing_for_parking,    :to => :finished,             :if => :seems_finished?
+        transition :from => :landing,               :to => :taxing_for_arrival,   :if => :seems_taxing?
+        transition :from => :taxing_for_arrival,    :to => :parked_for_arrival,   :if => :seems_parked?
+        (defined_states - [:invalid]).each {|state| transition :from => state, :to => :invalid, :if => :seems_invalid? }
       end
     end
-    
-    def status
-      @fsm.state
-    end
-    
-    def ended?
-      @fsm.state == :finished
-    end
+
+    # Flight status
+    def status; @fsm.state end
     
     # must be called periodically to process the flight state
-    def process
-      @fsm.advance
-    end
-    
-    def valid?
-      !@invalidated
-    end
-    
-    def abort
-      @invalidated = true
-    end
+    def process; @fsm.advance end
     
     def to_xml
       flight_element = REXML::Element.new('flight')
@@ -61,28 +48,28 @@ module RubyFlight
     
   protected
     ######### FSM Actions / Conditions #############
-    ## Starting    
-    def can_start?
-      @plane.on_ground? && @plane.parking_brake? &&
-             (@plane.engines.all? {|n| @plane.fuel.valve_closed?(n)} ||
-              @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)} &&
-              @plane.near_airport?(@flightplan.from))
+    ## Starting
+    def seems_invalid?
+      # TODO: no detecta cuando se cambia de posicion y eso
+      (!@sim.ready_to_fly? || @plane.crashed? || @plane.crashed_off_runway?)
     end
-    
-    def while_not_started
-      puts "Flight not prepared, waiting"
+
+    def while_invalid
+      puts "Flight not valid, waiting"
+    end
+
+    def seems_parked?
+      r = @plane.on_ground? && @plane.parking_brake? &&
+             (@plane.engines.all? {|n| @plane.fuel.valve_closed?(n)} ||
+              @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)})
+      puts "parked? #{r}"
+      return r
     end
             
-    def start_preparing
-      puts "started flight"
-      @plane.unload_airports
+    def start_parked_for_departure
       EventLogger.instance.log('flight_start', 'initial_fuel' => @plane.fuel.level)
     end
     
-    def while_preparing
-      puts "while started"
-    end    
-
     ## Taxing
     def seems_taxing?
       @plane.on_ground? &&
@@ -164,32 +151,24 @@ module RubyFlight
     end
     
     def check_touchdown_speed
-      if (@touchdown_speed.nil?) then
-        if @plane.on_ground? then
-          @touchdown_speed = @plane.last_vertical_speed
-          puts "touchdown estimated at #{@touchdown_speed} kts"
-          EventLogger.instance.log(:touchdown, { 'speed' => @touchdown_speed })
-        end
+      if (@touchdown_speed.nil? && @plane.on_ground?) then
+        @touchdown_speed = @plane.last_vertical_speed
+        puts "Touchdown estimated at #{@touchdown_speed} kts"
+        EventLogger.instance.log(:touchdown, { 'speed' => @touchdown_speed })
       end
     end    
 
     # Arrival Taxi
-    def start_taxing_for_parking
-      puts "start taxi for parking"
+    def start_taxing_for_arrival
+      puts "start taxi for arrival"
     end
 
-    def while_taxing_for_parking
-      puts "taxiing for parking"
+    def while_taxing_for_arrival
+      puts "taxiing for arrival"
     end
     
     # End
-    def seems_finished?
-      @plane.parking_brake? &&
-      (@plane.engines.all? {|n| @plane.fuel.valve_closed?(n)} ||
-      @plane.engines.all? {|n| @plane.fuel.near_zero_flow?(n)})
-    end
-    
-    def start_finished
+    def start_parked_for_arrival
       puts "finished"
       EventLogger.instance().log(:flight_end, {
         'final_fuel' => @plane.fuel.level,
@@ -197,7 +176,7 @@ module RubyFlight
       })
     end
     
-    def while_finished
+    def while_parked_for_arrival
       puts "while finished"
     end
     

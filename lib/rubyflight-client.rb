@@ -1,6 +1,11 @@
+require 'rubyflight'
 require 'rubyflight-client/flight'
 require 'rubyflight-client/flightplan'
 require 'rubyflight-client/eventlogger'
 require 'rubyflight-client/cargo'
 require 'rubyflight-client/airport'
+
+require 'fox16'
+require 'rubyflight-client/gui_logic'
 require 'rubyflight-client/main_loop'
+require 'rubyflight-client/gui'

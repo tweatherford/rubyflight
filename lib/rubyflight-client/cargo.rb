@@ -19,9 +19,9 @@ module RubyFlight
       @@definitions
     end
 
-    def self.random
+    def self.random(destination)
       definition = self.definitions[rand(self.definitions.size)]
-      Cargo.new(definition.name, rand(50) + 50, :SAEZ)
+      Cargo.new(definition.name, rand(50) + 50, destination)
     end
   end
 end
